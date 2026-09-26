@@ -1,0 +1,6 @@
+import Link from "next/link";
+import { Container } from "@/components/ui/container";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { getProjects } from "@/lib/data/public";
+
+export default async function ProjectsPage() { const projects = await getProjects(); return <div className="py-20 md:py-32"><Container><Eyebrow>Selected Work</Eyebrow><h1 className="mt-5 max-w-3xl text-4xl md:text-6xl font-bold tracking-tight">Production applications, backend systems, and AI products.</h1><div className="mt-16 grid gap-6 md:grid-cols-2">{projects.map((project) => <Link key={project.id} href={`/projects/${project.slug}`} className="group rounded-2xl border border-white/10 bg-[#121316] p-7 transition hover:border-[#5b8cff]/50"><div className="flex items-center justify-between"><span className="font-mono text-xs text-[#6c9cff]">{project.category}</span><span className="text-[#71717a]">↗</span></div><h2 className="mt-7 text-2xl font-semibold group-hover:text-[#6c9cff]">{project.title}</h2><p className="mt-3 text-sm leading-relaxed text-[#a1a1aa]">{project.short_description}</p><div className="mt-6 flex flex-wrap gap-2">{project.technologies?.map((tech) => <span key={tech.name} className="rounded-md border border-white/10 px-2 py-1 text-xs font-mono text-[#71717a]">{tech.name}</span>)}</div></Link>)}</div></Container></div>; }

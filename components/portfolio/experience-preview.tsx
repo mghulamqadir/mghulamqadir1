@@ -1,0 +1,11 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { Container } from "@/components/ui/container";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import type { Experience } from "@/lib/types";
+import { formatExperienceDateRange } from "@/lib/utils";
+
+export function ExperiencePreview({ experiences }: { experiences: Experience[] }) {
+  if (!experiences.length) return null;
+  return <section className="relative py-20 md:py-28"><Container><div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end"><div className="max-w-2xl space-y-4"><Eyebrow>Career trajectory</Eyebrow><h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Professional experience</h2><p className="text-base leading-relaxed text-[#a1a1aa] sm:text-lg">A record of backend-focused product engineering across SaaS and AI work.</p></div><Link href="/experience" className="inline-flex items-center gap-1.5 font-mono text-sm text-[#5b8cff] transition-colors hover:text-[#6c9cff]">View full experience <ArrowUpRight className="h-4 w-4" /></Link></div><div className="border-t border-white/[0.08]">{experiences.slice(0, 3).map((item) => <article key={item.id} className="grid grid-cols-1 items-start gap-6 rounded-lg border-b border-white/[0.08] px-2 py-8 transition-colors hover:bg-white/[0.01] md:grid-cols-12"><div className="md:col-span-3"><span className="font-mono text-xs font-semibold text-[#5b8cff]">{formatExperienceDateRange(item.start_date, item.end_date, item.current_role)}</span><p className="mt-1 text-xs text-[#71717a]">{item.location}</p></div><div className="md:col-span-6"><h3 className="text-lg font-bold tracking-tight text-white">{item.company}</h3><p className="mt-0.5 font-mono text-sm text-[#a1a1aa]">{item.role}</p>{item.description && <p className="mt-3 text-sm leading-relaxed text-[#71717a]">{item.description}</p>}</div><div className="flex flex-wrap gap-2 md:col-span-3 md:justify-end">{item.highlights?.slice(0, 2).map((highlight) => <span key={highlight} className="rounded border border-white/5 bg-[#16171a] px-2 py-0.5 font-mono text-[11px] text-[#a1a1aa]">{highlight}</span>)}</div></article>)}</div></Container></section>;
+}

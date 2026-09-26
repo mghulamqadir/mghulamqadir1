@@ -1,0 +1,6 @@
+import { NextResponse } from "next/server";
+import { createUploadSignature } from "@/lib/cloudinary";
+import { env } from "@/lib/env";
+import { requireAdmin } from "@/lib/supabase/auth";
+const folders = [/^portfolio\/projects\/[0-9a-f-]+\/(cover|gallery)$/, /^portfolio\/(profile|testimonials|certifications|resume|seo)$/];
+export async function POST(request: Request) { await requireAdmin(); const body = await request.json().catch(() => null) as { folder?: unknown; resource_type?: unknown } | null; const folder = body?.folder; const resourceType = body?.resource_type; if (typeof folder !== "string" || !folders.some((rule) => rule.test(folder)) || (resourceType !== "image" && resourceType !== "raw")) return NextResponse.json({ error: "Invalid upload request" }, { status: 400 }); if (resourceType === "raw" && folder !== "portfolio/resume") return NextResponse.json({ error: "Raw uploads are only allowed for resumes" }, { status: 400 }); const signature = createUploadSignature(folder); if (!signature || !env.CLOUDINARY_CLOUD_NAME || !env.CLOUDINARY_API_KEY) return NextResponse.json({ error: "Cloudinary is not configured" }, { status: 503 }); return NextResponse.json({ ...signature, cloudName: env.CLOUDINARY_CLOUD_NAME, apiKey: env.CLOUDINARY_API_KEY }); }

@@ -1,0 +1,4 @@
+import { Container } from "@/components/ui/container";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { ContactForm } from "@/components/portfolio/contact-form";
+export default function ContactPage() { return <div className="py-20 md:py-32"><Container><div className="grid gap-16 lg:grid-cols-[.8fr_1.2fr] lg:items-start"><div><Eyebrow>Contact</Eyebrow><h1 className="mt-5 text-4xl md:text-6xl font-bold tracking-tight">Have a project, opportunity, or problem worth discussing?</h1><p className="mt-6 text-lg leading-relaxed text-[#a1a1aa]">Send me a message and I&apos;ll get back to you.</p><div className="mt-10 space-y-3 text-sm text-[#a1a1aa]"><p>mohammadghulam.qadir@gmail.com</p><p>Lahore, Pakistan</p></div></div><div className="rounded-2xl border border-white/10 bg-[#0f1012] p-6 md:p-8"><ContactForm /></div></div></Container></div>; }

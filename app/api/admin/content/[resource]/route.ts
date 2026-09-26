@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/supabase/auth";
+import { contentSchemas, isContentResource } from "@/lib/admin-content";
+
+export async function POST(request: Request, { params }: { params: Promise<{ resource: string }> }) { const { resource } = await params; if (!isContentResource(resource)) return NextResponse.json({ error: "Unknown content resource" }, { status: 404 }); const { supabase, user } = await requireAdmin(); const parsed = contentSchemas[resource].safeParse(await request.json().catch(() => null)); if (!parsed.success) return NextResponse.json({ error: "Invalid content data" }, { status: 400 }); const { data, error } = await supabase.from(resource).insert(parsed.data as never).select("*").single(); if (error) return NextResponse.json({ error: error.message }, { status: 400 }); await supabase.from("audit_logs").insert({ user_id: user.id, action: `${resource}.created`, entity: resource, entity_id: data.id }); return NextResponse.json(data, { status: 201 }); }
