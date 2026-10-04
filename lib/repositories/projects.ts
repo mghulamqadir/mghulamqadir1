@@ -40,7 +40,7 @@ export async function createProject(value: Record<string, unknown>) {
     await db.collection("project_technologies").insertMany(technology_ids.map((tid: string) => ({ project_id: record.id, technology_id: tid })));
   }
   if (Array.isArray(gallery_images) && gallery_images.length > 0) {
-    await db.collection("project_images").insertMany(gallery_images.map((img: any, i: number) => ({ ...img, id: randomUUID(), project_id: record.id, sort_order: i })));
+    await db.collection("project_images").insertMany(gallery_images.map((img: Record<string, unknown>, i: number) => ({ ...img, id: randomUUID(), project_id: record.id, sort_order: i })));
   }
   return record;
 }
@@ -58,7 +58,7 @@ export async function updateProject(id: string, value: Record<string, unknown>) 
   if (gallery_images !== undefined) {
     await db.collection("project_images").deleteMany({ project_id: id });
     if (Array.isArray(gallery_images) && gallery_images.length > 0) {
-      await db.collection("project_images").insertMany(gallery_images.map((img: any, i: number) => ({ ...img, id: randomUUID(), project_id: id, sort_order: i })));
+      await db.collection("project_images").insertMany(gallery_images.map((img: Record<string, unknown>, i: number) => ({ ...img, id: randomUUID(), project_id: id, sort_order: i })));
     }
   }
   return findProject(id); 
