@@ -11,7 +11,7 @@
     "recommendation": "Import `revalidatePath` from `next/cache` and add revalidation triggers (`revalidatePath('/')`, `revalidatePath('/about')`, `revalidatePath('/experience')`) upon successful completion of POST, PATCH, and DELETE operations in generic content route handlers.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "already_fixed"
   },
   {
     "id": "ARCH-02",
@@ -137,7 +137,7 @@
     "recommendation": "Update `proxy.ts` matcher to include `'/api/admin/:path*'`. In `proxy.ts` and `requireAdmin()`, differentiate between page requests and API requests: return `NextResponse.json({ error: 'Unauthorized' }, { status: 401 })` for paths starting with `/api/`.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "already_fixed"
   },
   {
     "id": "SEC-03",
@@ -151,7 +151,7 @@
     "recommendation": "Upgrade `vitest` from `^2.1.9` to `^3.2.6` or latest `^5.0.3` (`npm install -D vitest@latest`), resolving all downstream high and critical advisories.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "SEC-04",
@@ -613,7 +613,7 @@
     "recommendation": "Install `@vitest/coverage-v8` as a development dependency: `npm install -D @vitest/coverage-v8`.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "TEST-03",
@@ -627,7 +627,7 @@
     "recommendation": "Either install `@playwright/test` and initialize Playwright configuration, or remove the dead script entry from `package.json`.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "OPS-01",

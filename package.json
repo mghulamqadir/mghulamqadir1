@@ -10,7 +10,6 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
     "db:indexes": "node scripts/create-indexes.mjs",
     "db:bootstrap-admin": "node scripts/bootstrap-admin.mjs",
     "db:import-supabase": "node scripts/import-supabase.mjs"
@@ -42,6 +41,7 @@
     "eslint-config-next": "16.3.6",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^2.1.9"
+    "vitest": "^3.2.6",
+    "@vitest/coverage-v8": "^3.2.6"
   }
 }
