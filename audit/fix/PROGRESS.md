@@ -3,6 +3,8 @@
 ## Batch Plan
 Batch 1: SEC-01, SEO-01, SEO-03, SEO-04, DATA-01, DATA-02
 Batch 2: ARCH-01, SEC-02, SEC-03, TEST-02, TEST-03
+Batch 3: PERF-01, A11Y-04, PERF-02, SEO-02, A11Y-01, A11Y-02, A11Y-03
+Batch 2: ARCH-01, SEC-02, SEC-03, TEST-02, TEST-03
 
 ---
 
@@ -24,21 +26,21 @@ Batch 2: ARCH-01, SEC-02, SEC-03, TEST-02, TEST-03
 | SEC-04 | HIGH | SEC | Rate Limiting Bypass via Spoofed Headers and Unbounded Memory Leak in Contact Form | todo | | | |
 | SEC-05 | MEDIUM | SEC | Admin Email Enumeration via Login Timing Attack | todo | | | |
 | SEC-06 | MEDIUM | SEC | Missing Essential HTTP Security Headers (HSTS, CSP, Permissions-Policy) | todo | | | |
-| PERF-01 | HIGH | PERF | Severe Root Bundle Bloat from Unconditioned Framer Motion | todo | | | |
-| PERF-02 | HIGH | PERF | High Dynamic TTFB and Missing Static Generation on Dynamic Case Studies | todo | | | |
+| PERF-01 | HIGH | PERF | Severe Root Bundle Bloat from Unconditioned Framer Motion | fixed | | | |
+| PERF-02 | HIGH | PERF | High Dynamic TTFB and Missing Static Generation | fixed | | | |
 | PERF-03 | MEDIUM | PERF | Unnecessary Client Component Directives on Static Architectural Diagrams | todo | | | |
 | PERF-04 | MEDIUM | PERF | Missing Cloudinary Automatic Format & Compression Optimization Pipeline | todo | | | |
 | PERF-05 | MEDIUM | PERF | Lack of Cross-Request Server-Side Data Caching in Data Layer | todo | | | |
 | PERF-06 | LOW | PERF | Absence of next/font Subsetting and Variable Font Metric Overrides | todo | | | |
 | SEO-01 | CRITICAL | SEO | Canonical Tag Self-Cannibalization | already_fixed | | | |
-| SEO-02 | HIGH | SEO | Soft 404 Response on Dynamic Project Detail Route | todo | | | |
+| SEO-02 | HIGH | SEO | Soft 404 Response on Dynamic Project Detail Route | fixed | | | |
 | SEO-03 | HIGH | SEO | Localhost Domain Leak in Sitemap | fixed | | | |
 | SEO-04 | MEDIUM | SEO | Admin Workspace Lack Noindex | already_fixed | | | |
 | SEO-05 | MEDIUM | SEO | Missing Structured Data on Project Case Studies and JSON-LD Unescaped Content | todo | | | |
-| A11Y-01 | HIGH | A11Y | WCAG 1.4.3 Contrast Violations on Muted and Faint Text Tokens | todo | | | |
-| A11Y-02 | HIGH | A11Y | WCAG 1.1.1 & 4.1.2 Failure on SVG Social Icons Lacking Accessible Names | todo | | | |
-| A11Y-03 | HIGH | A11Y | WCAG 2.4.1 Bypass Blocks Failure (Missing Skip Navigation Link) | todo | | | |
-| A11Y-04 | HIGH | A11Y | WCAG 2.4.3 & 2.1.2 Mobile Navigation Focus Management and Trap Deficiencies | todo | | | |
+| A11Y-01 | HIGH | A11Y | WCAG 1.4.3 Contrast Violations on Muted and Faint Text | fixed | | | |
+| A11Y-02 | HIGH | A11Y | WCAG 1.1.1 & 4.1.2 Failure on SVG Social Icons | fixed | | | |
+| A11Y-03 | HIGH | A11Y | Missing Skip-to-Content Link | already_fixed | | | |
+| A11Y-04 | HIGH | A11Y | Mobile Navigation Focus Management and Trap Deficiencies | fixed | | | |
 | A11Y-05 | HIGH | A11Y | WCAG 3.3.1, 4.1.3 & 1.3.5 Form Accessibility Violations in Public and Admin Forms | todo | | | |
 | A11Y-06 | MEDIUM | A11Y | WCAG 2.3.3 & 2.2.2 Reduced Motion Neglect across Animations and Diagrams | todo | | | |
 | A11Y-07 | MEDIUM | A11Y | WCAG 2.4.4 & 4.1.2 Ambiguous Action Button Labels in Admin CMS Lists | todo | | | |
@@ -60,5 +62,6 @@ Batch 2: ARCH-01, SEC-02, SEC-03, TEST-02, TEST-03
 | OPS-03 | MEDIUM | OPS | Zero Production Observability, Crash Tracking, and Fallback Logging | todo | | | |
 | OPS-04 | MEDIUM | OPS | Documentation and Configuration Discrepancies (Resend vs Brevo & Env Aliases) | todo | | | |
 | OPS-05 | LOW | OPS | Windows Shell Developer Incompatibility in Setup Script Documentation | todo | | | |
+
 
 

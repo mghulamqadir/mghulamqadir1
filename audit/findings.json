@@ -207,7 +207,7 @@
     "recommendation": "Replace Framer Motion in `mobile-nav.tsx` with standard Tailwind CSS transitions (`transition-all duration-200`, `opacity-0`/`opacity-100`, `translate-y-[-10px]`/`translate-y-0`) or dynamically import `MobileNav` with `next/dynamic` (`ssr: false`).",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "PERF-02",
@@ -221,7 +221,7 @@
     "recommendation": "Export `generateStaticParams` in `app/projects/[slug]/page.tsx` to pre-render published project slugs at build time: `export async function generateStaticParams() { const projects = await getProjects(); return projects.map((p) => ({ slug: p.slug })); }` and set `export const dynamicParams = true;`.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "PERF-03",
@@ -305,7 +305,7 @@
     "recommendation": "Ensure `generateMetadata` in `app/projects/[slug]/page.tsx` calls `notFound()` when the project is missing, or verify that dynamic routes evaluate existence prior to streaming headers.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "SEO-03",
@@ -361,7 +361,7 @@
     "recommendation": "Elevate `--foreground-muted` from `#71717a` to `#9ca3af` (5.8:1 ratio) and `--foreground-faint` from `#52525b` to `#a1a1aa` (8.5:1 ratio) in `app/globals.css`. Ensure all text elements achieve at least 4.5:1 contrast against `#09090b`.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "A11Y-02",
@@ -375,7 +375,7 @@
     "recommendation": "Remove `role='img'` and replace with `aria-hidden='true'` if the icon is purely decorative alongside text. If the icon represents a standalone button or interactive control, add an explicit `<title>` or pass `aria-label` / `aria-hidden` as props.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "A11Y-03",
@@ -389,7 +389,7 @@
     "recommendation": "Add a visually hidden, focus-visible Skip Link at the very top of `<body>` in `app/layout.tsx`: `<a href='#main-content' className='sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-[#5b8cff] focus:px-4 focus:py-2 focus:text-white'>Skip to main content</a>` and add `id='main-content'` to `<main>`.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "already_fixed"
   },
   {
     "id": "A11Y-04",
@@ -403,7 +403,7 @@
     "recommendation": "Add `aria-expanded={isOpen}` and `aria-controls='mobile-navigation-drawer'` to the button. Attach an `onKeyDown` listener checking for `event.key === 'Escape'` to call `close()`. Use a focus-trap wrapper or standard `useEffect` focus management to trap and restore focus.",
     "effort": "M",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "A11Y-05",

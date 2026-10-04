@@ -16,7 +16,7 @@ export function Footer() {
               <span className="text-white/20">•</span>
               <span className="text-xs font-mono text-[#a1a1aa]">Lahore, PK</span>
             </div>
-            <p className="text-sm text-[#71717a] leading-relaxed">
+            <p className="text-sm text-[#9ca3af] leading-relaxed">
               Backend-Focused Full Stack Engineer specializing in Node.js, AI / RAG pipelines, and reliable SaaS architectures.
             </p>
           </div>
@@ -30,7 +30,7 @@ export function Footer() {
             >
               <GitHubIcon className="w-4 h-4" />
               <span>GitHub</span>
-              <ArrowUpRight className="w-3 h-3 text-[#71717a]" />
+              <ArrowUpRight className="w-3 h-3 text-[#9ca3af]" />
             </a>
             <a
               href="https://linkedin.com/in/mghulamqadir"
@@ -40,7 +40,7 @@ export function Footer() {
             >
               <LinkedInIcon className="w-4 h-4" />
               <span>LinkedIn</span>
-              <ArrowUpRight className="w-3 h-3 text-[#71717a]" />
+              <ArrowUpRight className="w-3 h-3 text-[#9ca3af]" />
             </a>
             <Link
               href="/contact"
@@ -52,10 +52,10 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#52525b] font-mono">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#a1a1aa] font-mono">
           <p>© {currentYear} Ghulam Qadir. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-[#71717a]">
+            <span className="flex items-center gap-1.5 text-[#9ca3af]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
               Systems operational
             </span>
@@ -69,3 +69,4 @@ export function Footer() {
     </footer>
   );
 }
+
