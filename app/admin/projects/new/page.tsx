@@ -1,5 +1,5 @@
 import { ProjectForm } from "@/components/admin/project-form";
-import { requireAdmin } from "@/lib/supabase/auth";
+import { requireAdmin } from "@/lib/auth";
 
 export default async function NewProjectPage() {
   await requireAdmin();

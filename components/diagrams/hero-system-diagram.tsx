@@ -100,8 +100,8 @@ export function HeroSystemDiagram() {
               <div className="flex items-center gap-2">
                 <Database className="w-3.5 h-3.5 text-indigo-400" />
                 <div>
-                  <div className="text-xs font-medium text-white">PostgreSQL / Supabase</div>
-                  <div className="text-[10px] font-mono text-[#71717a]">ACID • RLS Protected</div>
+                  <div className="text-xs font-medium text-white">MongoDB Atlas</div>
+                  <div className="text-[10px] font-mono text-[#71717a]">Indexed document store</div>
                 </div>
               </div>
               <span className="text-[10px] font-mono text-indigo-400">Indexed</span>
@@ -118,7 +118,7 @@ export function HeroSystemDiagram() {
         </div>
         <div>
           <div className="text-xs text-[#71717a] font-mono">Data Validation</div>
-          <div className="text-sm font-semibold text-white mt-0.5">Strict Zod / RLS</div>
+          <div className="text-sm font-semibold text-white mt-0.5">Strict Zod / auth guards</div>
         </div>
         <div>
           <div className="text-xs text-[#71717a] font-mono">AI Execution</div>

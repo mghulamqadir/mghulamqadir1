@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ContentResource } from "@/lib/admin-content";
+import type { ContentResource } from "@/lib/content/content-config";
 
 type Field = { name: string; label: string; type?: "text" | "textarea" | "url" | "date" | "checkbox" | "select"; options?: string[] };
 const fields: Record<ContentResource, Field[]> = {

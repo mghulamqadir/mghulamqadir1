@@ -1,19 +1,13 @@
-import { createServerClient } from "@supabase/ssr";
+import { getToken } from "next-auth/jwt";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) return NextResponse.next();
-  let response = NextResponse.next({ request });
-  const supabase = createServerClient(url, key, {
-    cookies: {
-      getAll: () => request.cookies.getAll(),
-      setAll: (items) => { items.forEach(({ name, value }) => request.cookies.set(name, value)); response = NextResponse.next({ request }); items.forEach(({ name, value, options }) => response.cookies.set(name, value, options)); },
-    },
-  });
-  await supabase.auth.getUser();
-  return response;
+  const token = await getToken({ req: request, secret: process.env.AUTH_SECRET ?? process.env.JWT_SECRET });
+  const isAdmin = token?.role === "admin";
+  if (request.nextUrl.pathname.startsWith("/api/admin/") && !isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (request.nextUrl.pathname.startsWith("/admin") && !isAdmin) return NextResponse.redirect(new URL("/login", request.url));
+  if (request.nextUrl.pathname === "/login" && isAdmin) return NextResponse.redirect(new URL("/admin", request.url));
+  return NextResponse.next();
 }
 
-export const config = { matcher: ["/admin/:path*", "/login"] };
+export const config = { matcher: ["/admin/:path*", "/api/admin/:path*", "/login"] };

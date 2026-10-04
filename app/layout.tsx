@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   },
   description:
     "Backend-Focused Full Stack Engineer building production systems, AI/RAG pipelines, and scalable web platforms. Node.js, AI, PostgreSQL, Next.js.",
-  metadataBase: new URL("https://mghulamqadir.dev"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://mghulamqadir.dev"),
   keywords: [
     "Backend Engineer",
     "Node.js",
@@ -26,7 +26,6 @@ export const metadata: Metadata = {
   creator: "Ghulam Qadir",
   openGraph: { type: "website", title: "Ghulam Qadir — Backend-Focused Full Stack Engineer", description: "Backend systems, AI/RAG pipelines, and production SaaS applications.", siteName: "Ghulam Qadir" },
   twitter: { card: "summary_large_image", title: "Ghulam Qadir — Backend-Focused Full Stack Engineer", description: "Backend systems, AI/RAG pipelines, and production SaaS applications." },
-  alternates: { canonical: "/" },
 };
 
 export default function RootLayout({
@@ -40,9 +39,10 @@ export default function RootLayout({
       className="h-full antialiased dark"
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-[#09090b] text-[#fafafa] bg-grid-pattern selection:bg-[#5b8cff]/30 selection:text-white">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-[#5b8cff] focus:px-4 focus:py-2">Skip to content</a>
         <SeoJsonLd />
         <Header />
-        <main className="flex-1 flex flex-col relative">{children}</main>
+        <main id="main-content" className="flex-1 flex flex-col relative">{children}</main>
         <Footer />
       </body>
     </html>

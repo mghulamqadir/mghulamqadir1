@@ -2,9 +2,11 @@ import { z } from "zod";
 
 const envSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  MONGODB_URI: z.string().min(1).optional(),
+  MONGO_URI: z.string().min(1).optional(),
+  MONGODB_DB_NAME: z.string().min(1).default("portfolio"),
+  AUTH_SECRET: z.string().min(32).optional(),
+  JWT_SECRET: z.string().min(32).optional(),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
@@ -17,10 +19,14 @@ const envSchema = z.object({
 });
 
 const parsedEnv = envSchema.parse(process.env);
-export const env = { ...parsedEnv, BREVO_SENDER_EMAIL: parsedEnv.BREVO_SENDER_EMAIL ?? parsedEnv.SENDER_EMAIL, BREVO_SENDER_NAME: parsedEnv.SENDER_NAME ?? parsedEnv.BREVO_SENDER_NAME };
+const authSecret = parsedEnv.AUTH_SECRET ?? parsedEnv.JWT_SECRET;
+if (process.env.NODE_ENV === "production" && !authSecret) {
+  throw new Error("AUTH_SECRET (or the legacy JWT_SECRET) must be set to at least 32 characters in production.");
+}
+export const env = { ...parsedEnv, AUTH_SECRET: authSecret, MONGODB_URI: parsedEnv.MONGODB_URI ?? parsedEnv.MONGO_URI, BREVO_SENDER_EMAIL: parsedEnv.BREVO_SENDER_EMAIL ?? parsedEnv.SENDER_EMAIL, BREVO_SENDER_NAME: parsedEnv.SENDER_NAME ?? parsedEnv.BREVO_SENDER_NAME };
 
-export function hasSupabase() {
-  return Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+export function hasMongo() {
+  return Boolean(env.MONGODB_URI);
 }
 
 export function hasCloudinary() {

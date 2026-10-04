@@ -1,2 +1,2 @@
-import { requireAdmin } from "@/lib/supabase/auth";
+import { requireAdmin } from "@/lib/auth";
 export default async function MediaPage() { await requireAdmin(); return <div><p className="font-mono text-xs uppercase tracking-wider text-[#6c9cff]">Website</p><h1 className="mt-3 text-3xl font-bold">Media</h1><p className="mt-4 max-w-2xl text-[#a1a1aa]">Project cover and gallery uploads are managed from each project editor. Resume media is managed in Settings. Assets upload directly to Cloudinary through server-authorized signatures.</p></div>; }

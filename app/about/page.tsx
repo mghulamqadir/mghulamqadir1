@@ -2,6 +2,8 @@ import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { getExperiences, getTechnologies } from "@/lib/data/public";
 import { formatExperienceDateRange } from "@/lib/utils";
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "About", description: "Learn more about Ghulam Qadir, backend-focused full stack engineer.", alternates: { canonical: "/about" } };
 
 export default async function AboutPage() {
   const [experiences, technologies] = await Promise.all([getExperiences(), getTechnologies()]);
