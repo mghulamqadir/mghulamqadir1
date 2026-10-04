@@ -3,6 +3,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SeoJsonLd } from "@/components/seo-json-ld";
+import { env } from "@/lib/env";
 
 export const metadata: Metadata = {
   title: {
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   },
   description:
     "Backend-Focused Full Stack Engineer building production systems, AI/RAG pipelines, and scalable web platforms. Node.js, AI, PostgreSQL, Next.js.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://mghulamqadir.dev"),
+  metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL as string),
   keywords: [
     "Backend Engineer",
     "Node.js",

@@ -81,7 +81,7 @@
     "recommendation": "Refactor fallback conditions in `lib/data/public.ts` to activate when query results are empty: `const result = await repository.getPublishedProjects(); return result.length > 0 ? result : fallbackProjects;`.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "DATA-02",
@@ -95,7 +95,7 @@
     "recommendation": "Explicitly pass `dbName: env.MONGODB_DB_NAME` in the connection options of `mongoose.connect()` in `lib/database/mongodb.ts`.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "already_fixed"
   },
   {
     "id": "DATA-03",
@@ -123,7 +123,7 @@
     "recommendation": "Make `AUTH_SECRET` strictly required in `lib/env.ts`: `AUTH_SECRET: z.string().min(32)` (or map `JWT_SECRET` fallback: `process.env.AUTH_SECRET || process.env.JWT_SECRET`). Ensure deployment environments inject a cryptographically secure 32+ character secret.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "SEC-02",
@@ -291,7 +291,7 @@
     "recommendation": "Remove `alternates: { canonical: '/' }` from root `app/layout.tsx`. Export explicit metadata with proper page-specific canonicals on each subpage (`alternates: { canonical: '/projects' }`, etc.).",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "already_fixed"
   },
   {
     "id": "SEO-02",
@@ -319,7 +319,7 @@
     "recommendation": "Make `NEXT_PUBLIC_SITE_URL` strictly required in production without a localhost fallback, or fail the build if `NEXT_PUBLIC_SITE_URL` is missing.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "fixed"
   },
   {
     "id": "SEO-04",
@@ -333,7 +333,7 @@
     "recommendation": "Export `export const metadata: Metadata = { robots: { index: false, follow: false } };` in `app/admin/layout.tsx` and `app/login/page.tsx`.",
     "effort": "S",
     "confidence": "High",
-    "status": "open"
+    "status": "already_fixed"
   },
   {
     "id": "SEO-05",

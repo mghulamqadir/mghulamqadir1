@@ -1,7 +1,7 @@
 # Remediation Progress
 
 ## Batch Plan
-*To be filled.*
+Batch 1: SEC-01, SEO-01, SEO-03, SEO-04, DATA-01, DATA-02
 
 ---
 
@@ -14,10 +14,10 @@
 | ARCH-03 | HIGH | ARCH | MongoDB Connection Pool Exhaustion Risk in Serverless Deployments | todo | | | |
 | ARCH-04 | HIGH | ARCH | Non-Transactional Relational Deletions Causing Orphan Database Records | todo | | | |
 | ARCH-05 | LOW | ARCH | Dead Code Files and Unused Database Utility Exports | todo | | | |
-| DATA-01 | CRITICAL | DATA | Empty Connected MongoDB Database Completely Wipes Out Public Portfolio Content | todo | | | |
-| DATA-02 | HIGH | DATA | Mongoose Connection Ignores MONGODB_DB_NAME Configuration and Connects to 'test' | todo | | | |
+| DATA-01 | CRITICAL | DATA | Empty Connected MongoDB completely wipes out | fixed | | | |
+| DATA-02 | HIGH | DATA | Mongoose Connection Ignores MONGODB_DB_NAME | already_fixed | | | |
 | DATA-03 | HIGH | DATA | CMS Project Authoring Cannot Associate Technologies or Gallery Images | todo | | | |
-| SEC-01 | CRITICAL | SEC | AUTH_SECRET Optional in Validation Causing Total Production NextAuth Crash | todo | | | |
+| SEC-01 | CRITICAL | SEC | AUTH_SECRET Optional | fixed | | | |
 | SEC-02 | HIGH | SEC | Edge Proxy Excludes /api/admin/* and Uses 307 Redirect for API Unauthorized Requests | todo | | | |
 | SEC-03 | HIGH | SEC | Critical Supply Chain Vulnerability in Vitest UI Server (CVSS 9.8) | todo | | | |
 | SEC-04 | HIGH | SEC | Rate Limiting Bypass via Spoofed Headers and Unbounded Memory Leak in Contact Form | todo | | | |
@@ -29,10 +29,10 @@
 | PERF-04 | MEDIUM | PERF | Missing Cloudinary Automatic Format & Compression Optimization Pipeline | todo | | | |
 | PERF-05 | MEDIUM | PERF | Lack of Cross-Request Server-Side Data Caching in Data Layer | todo | | | |
 | PERF-06 | LOW | PERF | Absence of next/font Subsetting and Variable Font Metric Overrides | todo | | | |
-| SEO-01 | CRITICAL | SEO | Canonical Tag Self-Cannibalization on All Public Subpages | todo | | | |
+| SEO-01 | CRITICAL | SEO | Canonical Tag Self-Cannibalization | already_fixed | | | |
 | SEO-02 | HIGH | SEO | Soft 404 Response on Dynamic Project Detail Route | todo | | | |
-| SEO-03 | HIGH | SEO | Localhost Domain Leak in Sitemap and Robots.txt When Env Unset | todo | | | |
-| SEO-04 | MEDIUM | SEO | Admin Workspace and Login Pages Lack Noindex Directives | todo | | | |
+| SEO-03 | HIGH | SEO | Localhost Domain Leak in Sitemap | fixed | | | |
+| SEO-04 | MEDIUM | SEO | Admin Workspace Lack Noindex | already_fixed | | | |
 | SEO-05 | MEDIUM | SEO | Missing Structured Data on Project Case Studies and JSON-LD Unescaped Content | todo | | | |
 | A11Y-01 | HIGH | A11Y | WCAG 1.4.3 Contrast Violations on Muted and Faint Text Tokens | todo | | | |
 | A11Y-02 | HIGH | A11Y | WCAG 1.1.1 & 4.1.2 Failure on SVG Social Icons Lacking Accessible Names | todo | | | |
@@ -59,3 +59,4 @@
 | OPS-03 | MEDIUM | OPS | Zero Production Observability, Crash Tracking, and Fallback Logging | todo | | | |
 | OPS-04 | MEDIUM | OPS | Documentation and Configuration Discrepancies (Resend vs Brevo & Env Aliases) | todo | | | |
 | OPS-05 | LOW | OPS | Windows Shell Developer Incompatibility in Setup Script Documentation | todo | | | |
+
