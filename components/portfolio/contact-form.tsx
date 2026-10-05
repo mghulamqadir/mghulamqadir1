@@ -96,6 +96,7 @@ export function ContactForm() {
             aria-invalid={state === "error"}
             aria-describedby={state === "error" ? "form-error-msg" : undefined}
           />
+          <span className="text-[11px] font-mono text-text-faint">At least 2 characters</span>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -113,6 +114,7 @@ export function ContactForm() {
             aria-invalid={state === "error"}
             aria-describedby={state === "error" ? "form-error-msg" : undefined}
           />
+          <span className="text-[11px] font-mono text-text-faint">Valid email address</span>
         </div>
       </div>
 
@@ -130,6 +132,7 @@ export function ContactForm() {
           aria-invalid={state === "error"}
           aria-describedby={state === "error" ? "form-error-msg" : undefined}
         />
+        <span className="text-[11px] font-mono text-text-faint">At least 2 characters, no line breaks</span>
       </div>
 
       {/* Message textarea */}
@@ -147,10 +150,14 @@ export function ContactForm() {
           aria-invalid={state === "error"}
           aria-describedby={state === "error" ? "form-error-msg" : undefined}
         />
+        <div className="flex items-center justify-between text-[11px] font-mono text-text-faint">
+          <span>At least 10 characters</span>
+          <span>Markdown supported</span>
+        </div>
       </div>
 
-      {/* Honeypot field (hidden from sight and assistive tech) */}
-      <div className="sr-only" aria-hidden="true">
+      {/* Honeypot field (hidden from sight, screen readers, and autofill) */}
+      <div style={{ display: "none" }} aria-hidden="true">
         <label htmlFor="contact-website">Website</label>
         <input
           type="text"
@@ -158,6 +165,9 @@ export function ContactForm() {
           name="website"
           tabIndex={-1}
           autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
         />
       </div>
 

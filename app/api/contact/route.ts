@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON request body." }, { status: 400 });
   }
   if (rawBody.website) {
-    return NextResponse.json({ error: "Please check the form and try again." }, { status: 400 });
+    return NextResponse.json({ error: "Spam verification failed. Please leave the website field blank." }, { status: 400 });
   }
   const parsed = contactSchema.safeParse(rawBody);
   if (!parsed.success) {

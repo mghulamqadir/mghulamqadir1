@@ -3,7 +3,7 @@ import { z } from "zod";
 export { z };
 
 /** Zod 4 helpers shared by every request/configuration validator. */
-export const emailSchema = z.string().trim().pipe(z.email().max(200));
+export const emailSchema = z.string().trim().pipe(z.email("Please provide a valid email address (e.g. name@company.com).").max(200));
 export const optionalText = (max: number) => z.string().trim().max(max).optional().or(z.literal(""));
 export const httpUrlSchema = z.url().max(500).refine((value) => /^https?:\/\//.test(value), "Only HTTP(S) URLs are allowed");
 export const optionalHttpUrl = z.union([z.literal(""), httpUrlSchema]).optional();
