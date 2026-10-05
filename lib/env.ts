@@ -7,7 +7,7 @@ const isBuild =
   Boolean(process.env.NEXT_IS_BUILDING);
 
 const defaultSiteUrl = isProduction
-  ? "https://mghulamqadir.dev"
+  ? "https://mghulamqadir1.vercel.app"
   : "http://localhost:3000";
 
 const defaultAuthSecret = "development_or_build_secret_32_chars_minimum";
