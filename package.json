@@ -12,7 +12,8 @@
         "test:watch": "vitest",
         "db:indexes": "node scripts/create-indexes.mjs",
         "db:bootstrap-admin": "node scripts/bootstrap-admin.mjs",
-        "db:import-supabase": "node scripts/import-supabase.mjs",
+    "db:import-supabase": "node scripts/import-supabase.mjs",
+    "db:copy-test-content": "node scripts/copy-mongo-content.mjs",
         "db:seed": "node scripts/seed-cms-data.mjs"
     },
     "dependencies": {

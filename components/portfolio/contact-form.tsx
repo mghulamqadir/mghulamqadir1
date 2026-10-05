@@ -25,11 +25,38 @@ export function ContactForm() {
       return;
     }
 
+    const name = String(form.get("name") ?? "").trim();
+    const email = String(form.get("email") ?? "").trim();
+    const subject = String(form.get("subject") ?? "").trim();
+    const message = String(form.get("message") ?? "").trim();
+    const website = String(form.get("website") ?? "");
+
+    if (name.length < 2) {
+      setError("Please enter your name (at least 2 characters).");
+      setState("error");
+      return;
+    }
+    if (!email || !email.includes("@")) {
+      setError("Please enter a valid email address.");
+      setState("error");
+      return;
+    }
+    if (subject.length < 2) {
+      setError("Please enter a subject (at least 2 characters).");
+      setState("error");
+      return;
+    }
+    if (message.length < 10) {
+      setError("Please write a message with at least 10 characters.");
+      setState("error");
+      return;
+    }
+
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(Object.fromEntries(form)),
+        body: JSON.stringify({ name, email, subject, message, website }),
       });
 
       if (response.ok) {
