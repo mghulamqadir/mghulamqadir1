@@ -3,11 +3,11 @@ import bcrypt from "bcryptjs";
 import { MongoClient } from "mongodb";
 import { randomUUID } from "crypto";
 
-const { MONGODB_URI, MONGODB_DB_NAME = "portfolio", BOOTSTRAP_ADMIN_EMAIL, BOOTSTRAP_ADMIN_PASSWORD } = process.env;
-if (!MONGODB_URI || !BOOTSTRAP_ADMIN_EMAIL || !BOOTSTRAP_ADMIN_PASSWORD) throw new Error("MONGODB_URI, BOOTSTRAP_ADMIN_EMAIL, and BOOTSTRAP_ADMIN_PASSWORD are required.");
+const { MONGO_URI, MONGODB_DB_NAME = "portfolio", BOOTSTRAP_ADMIN_EMAIL, BOOTSTRAP_ADMIN_PASSWORD } = process.env;
+if (!MONGO_URI || !BOOTSTRAP_ADMIN_EMAIL || !BOOTSTRAP_ADMIN_PASSWORD) throw new Error("MONGO_URI, BOOTSTRAP_ADMIN_EMAIL, and BOOTSTRAP_ADMIN_PASSWORD are required.");
 if (BOOTSTRAP_ADMIN_PASSWORD.length < 12) throw new Error("BOOTSTRAP_ADMIN_PASSWORD must be at least 12 characters.");
 
-const client = new MongoClient(MONGODB_URI);
+const client = new MongoClient(MONGO_URI);
 await client.connect();
 try {
   const profiles = client.db(MONGODB_DB_NAME).collection("profiles");

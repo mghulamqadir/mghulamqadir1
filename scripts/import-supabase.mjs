@@ -1,11 +1,11 @@
 import "dotenv/config";
 import { MongoClient } from "mongodb";
 
-const { MONGODB_URI, MONGODB_DB_NAME = "portfolio", SUPABASE_IMPORT_URL, SUPABASE_IMPORT_SERVICE_ROLE_KEY } = process.env;
-if (!MONGODB_URI || !SUPABASE_IMPORT_URL || !SUPABASE_IMPORT_SERVICE_ROLE_KEY) throw new Error("MONGODB_URI, SUPABASE_IMPORT_URL, and SUPABASE_IMPORT_SERVICE_ROLE_KEY are required.");
+const { MONGO_URI, MONGODB_DB_NAME = "portfolio", SUPABASE_IMPORT_URL, SUPABASE_IMPORT_SERVICE_ROLE_KEY } = process.env;
+if (!MONGO_URI || !SUPABASE_IMPORT_URL || !SUPABASE_IMPORT_SERVICE_ROLE_KEY) throw new Error("MONGO_URI, SUPABASE_IMPORT_URL, and SUPABASE_IMPORT_SERVICE_ROLE_KEY are required.");
 
 const collections = ["profiles", "projects", "technologies", "project_technologies", "project_images", "testimonials", "experiences", "experience_highlights", "skills", "education", "certifications", "social_links", "contact_submissions", "site_settings", "audit_logs"];
-const client = new MongoClient(MONGODB_URI);
+const client = new MongoClient(MONGO_URI);
 
 async function sourceRows(name) {
   const rows = [];
