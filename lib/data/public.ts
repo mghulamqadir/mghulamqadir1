@@ -11,7 +11,16 @@ export const getProjects = cache(async (): Promise<Project[]> => {
 export async function getFeaturedProjects() { return (await getProjects()).filter((p) => p.featured).slice(0, 4); }
 export const getProject = cache(async (slug: string): Promise<Project | null> => {
   if (!hasMongo()) return fallbackProjects.find((p) => p.slug === slug) ?? null;
-  try { return await repository.getPublishedProject(slug); } catch (error) { console.error("Serving fallback project", { message: error instanceof Error ? error.message : "unknown" }); return fallbackProjects.find((project) => project.slug === slug) ?? null; }
+  try { 
+    const project = await repository.getPublishedProject(slug);
+    if (!project) {
+      return fallbackProjects.find((p) => p.slug === slug) ?? null;
+    }
+    return project;
+  } catch (error) { 
+    console.error("Serving fallback project", { message: error instanceof Error ? error.message : "unknown" }); 
+    return fallbackProjects.find((project) => project.slug === slug) ?? null; 
+  }
 });
 export const getExperiences = cache(async (): Promise<Experience[]> => {
   if (!hasMongo()) return fallbackExperiences;

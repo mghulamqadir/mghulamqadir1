@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: "default" | "narrow" | "wide";
 }
 
@@ -13,7 +13,7 @@ export function Container({
 }: ContainerProps) {
   const sizeClasses = {
     default: "max-w-6xl", // ~1152px - 1200px
-    narrow: "max-w-3xl",  // 768px (ideal for case studies / long text)
+    narrow: "max-w-3xl",  // 768px (ideal for editorial case studies & measure 68-72ch)
     wide: "max-w-7xl",    // 1280px+
   };
 

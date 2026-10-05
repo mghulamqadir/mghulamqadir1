@@ -1,101 +1,128 @@
 import React from "react";
-import { Server, Bot, Layers, CheckCircle2 } from "lucide-react";
+import { Server, Bot, Database, CreditCard, CheckCircle2 } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
-import { Surface } from "@/components/ui/surface";
+import { Badge } from "@/components/ui/badge";
 
 export function Expertise() {
-  const pillars = [
+  const capabilities = [
     {
-      title: "Backend Systems",
+      title: "Backend Architecture & Distributed APIs",
       icon: Server,
+      featured: true,
+      colSpan: "md:col-span-2",
       description:
-        "High-throughput RESTful APIs, secure authentication systems, relational database architecture, payment webhooks, and third-party integrations.",
+        "High-throughput RESTful services, strict schema validation, role-based authorization, rate-limiting guards, and clean layered domain architecture.",
       highlights: [
-        "Relational schema modeling (PostgreSQL / Supabase)",
-        "Stripe & Stripe Connect checkout and subscription lifecycles",
-        "Deterministic rate-limiting & session authorization",
-        "Clean layered domain architecture",
+        "Layered service and repository architecture with zero DB leak in presentations",
+        "Deterministic rate-limiting & session-based JWT authentication",
+        "Deterministic error handling with strict status codes and RFC7807 problem details",
       ],
-      techBadge: "Node.js • Express • PostgreSQL",
+      tags: ["Node.js", "Express", "TypeScript", "Next.js", "Zod", "REST"],
     },
     {
-      title: "AI Engineering & RAG",
+      title: "AI Orchestration & RAG Pipelines",
       icon: Bot,
+      featured: true,
+      colSpan: "md:col-span-2",
       description:
-        "Multi-stage AI processing pipelines, structured information extraction, Perplexity and OpenAI integration, and contextual vector search systems.",
+        "Multi-stage sequential LLM processing workflows, semantic vector retrieval, structured JSON extractions, and context-passing retry mechanisms.",
       highlights: [
-        "Multi-stage sequential event extraction pipelines",
-        "Schema validation & null normalization via Zod",
-        "Context passing & fallback retry resilience",
-        "Vector indexing & semantic retrieval workflows",
+        "Sequential event processing pipelines with incremental state persistence",
+        "Vector search & semantic grounding using LLM APIs",
+        "Defensive retry queues handling model drift and provider rate limits",
       ],
-      techBadge: "RAG • LLM APIs • Vector Search",
+      tags: ["AI / RAG", "Perplexity API", "Vector Embeddings", "Context Pipelines"],
     },
     {
-      title: "Product Engineering",
-      icon: Layers,
+      title: "Data Engineering & Persistence",
+      icon: Database,
+      colSpan: "md:col-span-1",
       description:
-        "Full-stack web applications merging robust backend foundations with responsive, accessible, and high-performance user interfaces.",
+        "Production database schema design, index optimization, document collections, and relational migration pipelines.",
       highlights: [
-        "Next.js App Router & React Server Components",
-        "Role-based multi-tenant user access control",
-        "Transactional email workflows (Brevo)",
-        "End-to-end type safety across client & server",
+        "Compound indexing & TTL lifecycle policies",
+        "Clean migration paths between SQL and document stores",
       ],
-      techBadge: "Next.js • React • Tailwind CSS",
+      tags: ["PostgreSQL", "MongoDB Atlas", "Supabase", "Mongoose"],
+    },
+    {
+      title: "Billing & Financial Infrastructure",
+      icon: CreditCard,
+      colSpan: "md:col-span-1",
+      description:
+        "Robust subscription lifecycles, marketplace split payouts via Stripe Connect, and idempotent webhook processors.",
+      highlights: [
+        "Idempotent webhook handling with signature verification",
+        "Multi-party vendor payouts and subscription management",
+      ],
+      tags: ["Stripe", "Stripe Connect", "Webhooks", "Billing"],
     },
   ];
 
   return (
     <section className="py-20 md:py-28 relative">
       <Container>
-        <div className="flex flex-col gap-4 max-w-2xl mb-12 md:mb-16">
-          <Eyebrow>What I Build</Eyebrow>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-            Engineering depth across the entire application lifecycle.
+        <div className="flex flex-col gap-3 max-w-2xl mb-12 md:mb-16">
+          <Eyebrow>Core Capabilities</Eyebrow>
+          <h2 className="text-heading-2 text-text font-semibold tracking-tight">
+            Engineering depth across the production lifecycle.
           </h2>
-          <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed">
-            From database schemas and API orchestration to AI pipelines and frontend execution, I build systems engineered for correctness, maintainability, and scale.
+          <p className="text-body-lg text-text-muted leading-relaxed">
+            From database schemas and API orchestration to AI pipelines and payment workflows, I build systems engineered for correctness, maintainability, and scale.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {pillars.map((pillar) => {
-            const Icon = pillar.icon;
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {capabilities.map((item) => {
+            const Icon = item.icon;
             return (
-              <Surface
-                key={pillar.title}
-                elevation="flat"
-                className="flex flex-col justify-between group hover:border-[#5b8cff]/30 transition-all duration-300"
+              <div
+                key={item.title}
+                className={`rounded-2xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-200 ${
+                  item.featured
+                    ? "bg-surface border border-border hover:border-accent/30 shadow-lg shadow-black/20"
+                    : "bg-surface border border-border hover:border-border-strong"
+                }`}
               >
                 <div>
-                  <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#5b8cff] group-hover:scale-105 transition-transform mb-6">
-                    <Icon className="w-5 h-5" />
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-surface-2 border border-border flex items-center justify-center text-accent">
+                      <Icon className="w-5 h-5" aria-hidden="true" />
+                    </div>
+                    {item.featured && (
+                      <span className="text-[11px] font-mono text-accent bg-accent/10 border border-accent/20 px-2.5 py-0.5 rounded-full font-medium">
+                        Core Strength
+                      </span>
+                    )}
                   </div>
 
-                  <h3 className="text-xl font-bold text-white tracking-tight mb-3">
-                    {pillar.title}
+                  <h3 className="text-xl font-bold text-text tracking-tight mb-3">
+                    {item.title}
                   </h3>
 
-                  <p className="text-sm text-[#a1a1aa] leading-relaxed mb-6">
-                    {pillar.description}
+                  <p className="text-sm text-text-muted leading-relaxed mb-6">
+                    {item.description}
                   </p>
 
-                  <div className="space-y-2.5 pt-4 border-t border-white/[0.06] mb-6">
-                    {pillar.highlights.map((item, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-xs text-[#71717a]">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#5b8cff] shrink-0 mt-0.5" />
-                        <span>{item}</span>
+                  <div className="space-y-2.5 pt-4 border-t border-border mb-6">
+                    {item.highlights.map((h, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-xs text-text-faint">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" aria-hidden="true" />
+                        <span>{h}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between font-mono text-xs text-[#71717a]">
-                  <span>{pillar.techBadge}</span>
+                <div className="pt-4 border-t border-border flex flex-wrap gap-2">
+                  {item.tags.map((tag) => (
+                    <Badge key={tag} variant="default" font="mono">
+                      {tag}
+                    </Badge>
+                  ))}
                 </div>
-              </Surface>
+              </div>
             );
           })}
         </div>

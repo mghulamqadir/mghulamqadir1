@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180" fill="none">
+  <rect width="180" height="180" rx="40" fill="#07080B" />
+  <rect x="1" y="1" width="178" height="178" rx="39" stroke="#F2B864" stroke-opacity="0.3" stroke-width="2" />
+  <path d="M110 40C83.5 40 62 61.5 62 88C62 114.5 83.5 136 110 136C91.5 125 80 107.5 80 88C80 68.5 91.5 51 110 40Z" fill="url(#moon-apple-grad)" />
+  <circle cx="120" cy="68" r="8" fill="#FCE1A8" />
+  <defs>
+    <linearGradient id="moon-apple-grad" x1="62" y1="40" x2="110" y2="136" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCE1A8" />
+      <stop offset="0.5" stop-color="#F2B864" />
+      <stop offset="1" stop-color="#C98B27" />
+    </linearGradient>
+  </defs>
+</svg>
