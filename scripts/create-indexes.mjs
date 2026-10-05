@@ -1,9 +1,9 @@
 import "dotenv/config";
 import { MongoClient } from "mongodb";
 
-const { MONGODB_URI, MONGODB_DB_NAME = "portfolio" } = process.env;
-if (!MONGODB_URI) throw new Error("MONGODB_URI is required.");
-const client = new MongoClient(MONGODB_URI);
+const { MONGO_URI, MONGODB_DB_NAME = "portfolio" } = process.env;
+if (!MONGO_URI) throw new Error("MONGO_URI is required.");
+const client = new MongoClient(MONGO_URI);
 await client.connect();
 try {
   const db = client.db(MONGODB_DB_NAME);
