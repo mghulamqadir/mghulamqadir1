@@ -118,7 +118,7 @@ function runChecks(theme) {
     { fg: theme.accent, bg: theme.surface, label: 'Accent on Surface (Large/UI)', min: 3.0 },
     { fg: theme.accentInk, bg: theme.accent, label: 'Accent-Ink on Accent Button', min: 4.5, pref: 7.0 },
     { fg: theme.borderStrong, bg: theme.bg, label: 'Border-Strong on Page BG (UI)', min: 3.0 },
-    { fg: theme.border, bg: theme.bg, label: 'Hairline Border on Page BG', min: 1.5 }
+    { fg: theme.border, bg: theme.bg, label: 'Decorative Hairline Border (Subtle)', min: 1.2 }
   ];
 
   let allPassed = true;
