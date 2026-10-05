@@ -24,10 +24,10 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   BREVO_API_KEY: z.string().optional(),
-  BREVO_SENDER_EMAIL: z.string().email().optional(),
+  BREVO_SENDER_EMAIL: z.email().optional(),
   BREVO_SENDER_NAME: z.string().default("Ghulam Qadir Portfolio"),
-  CONTACT_TO_EMAIL: z.string().email().default("mohammadghulam.qadir@gmail.com"),
-  SENDER_EMAIL: z.string().email().optional(),
+  CONTACT_TO_EMAIL: z.email().default("mohammadghulam.qadir@gmail.com"),
+  SENDER_EMAIL: z.email().optional(),
   SENDER_NAME: z.string().optional(),
 }).transform(raw => {
   // Normalize site URL

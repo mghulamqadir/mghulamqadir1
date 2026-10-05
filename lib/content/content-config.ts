@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const optionalText = (max: number) => z.string().trim().max(max).optional().or(z.literal(""));
-const optionalUrl = z.union([z.literal(""), z.string().url().max(500)]).optional();
+const optionalUrl = z.union([z.literal(""), z.url().max(500)]).optional();
 const common = { sort_order: z.coerce.number().int().min(0).max(10000).default(0) };
 
 export const contentSchemas = {
@@ -10,7 +10,7 @@ export const contentSchemas = {
   skills: z.object({ name: z.string().trim().min(1).max(100), category: z.string().trim().min(1).max(80), icon: optionalText(100), featured: z.boolean(), ...common }),
   education: z.object({ institution: z.string().trim().min(2).max(160), degree: optionalText(160), field: optionalText(160), location: optionalText(120), start_date: z.union([z.literal(""), z.string().date()]).optional(), end_date: z.union([z.literal(""), z.string().date()]).optional(), description: optionalText(5000), ...common }),
   certifications: z.object({ name: z.string().trim().min(2).max(160), issuer: optionalText(160), issue_date: z.union([z.literal(""), z.string().date()]).optional(), credential_url: optionalUrl, credential_id: optionalText(160), image_url: optionalUrl, image_public_id: optionalText(500), ...common }),
-  social_links: z.object({ platform: z.string().trim().min(2).max(80), url: z.string().url().max(500), icon: optionalText(100), enabled: z.boolean(), ...common }),
+  social_links: z.object({ platform: z.string().trim().min(2).max(80), url: z.url().max(500), icon: optionalText(100), enabled: z.boolean(), ...common }),
 } as const;
 
 export type ContentResource = keyof typeof contentSchemas;
