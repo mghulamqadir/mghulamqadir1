@@ -1,2 +1,55 @@
 "use client";
-export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <div className="flex min-h-[50vh] flex-col items-center justify-center px-6 text-center"><h1 className="text-2xl font-semibold">Something went wrong.</h1><p className="mt-3 text-[#a1a1aa]">Please try again.</p><button onClick={() => reset()} className="mt-6 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black">Try again</button></div>; }
+
+import React, { useEffect } from "react";
+import { AlertCircle, RotateCcw, Home } from "lucide-react";
+import { Container } from "@/components/ui/container";
+import { Button } from "@/components/ui/button";
+
+export default function ErrorPage({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log unexpected client exceptions
+    console.error("App boundary error caught:", error);
+  }, [error]);
+
+  return (
+    <div className="min-h-[70vh] flex items-center justify-center py-20">
+      <Container size="narrow">
+        <div className="rounded-2xl border border-danger/30 bg-surface p-10 sm:p-14 text-center shadow-2xl shadow-black/50">
+          <div className="w-12 h-12 rounded-xl bg-danger/10 border border-danger/20 flex items-center justify-center text-danger mx-auto mb-5">
+            <AlertCircle className="w-6 h-6" aria-hidden="true" />
+          </div>
+
+          <span className="font-mono text-xs uppercase tracking-widest text-danger font-semibold px-3 py-1 rounded-full bg-surface-2 border border-danger/20 mb-4 inline-block">
+            Runtime Error Caught
+          </span>
+
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-text mb-4">
+            Something went wrong.
+          </h1>
+
+          <p className="text-body-lg text-text-muted max-w-md mx-auto mb-8 leading-relaxed">
+            An unexpected client-side exception occurred during execution. You can attempt to
+            re-render this view or navigate back to the home page.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Button variant="primary" size="lg" onClick={() => reset()}>
+              <RotateCcw className="w-4 h-4 mr-2" aria-hidden="true" />
+              <span>Try again</span>
+            </Button>
+            <Button variant="secondary" size="lg" href="/">
+              <Home className="w-4 h-4 mr-2" aria-hidden="true" />
+              <span>Return home</span>
+            </Button>
+          </div>
+        </div>
+      </Container>
+    </div>
+  );
+}
