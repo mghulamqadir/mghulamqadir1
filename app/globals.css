@@ -230,3 +230,67 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-faint);
 }
+
+/* Print Stylesheet (Recruiter & resume-friendly black-on-white layout) */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Hide interactive chrome, film grain, mobile navigation, backgrounds */
+  header,
+  footer,
+  .film-grain,
+  .hero-gold-glow,
+  button:not(.print-keep),
+  [aria-hidden="true"],
+  nav,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Force background colors to transparent/white and borders to subtle gray */
+  main,
+  article,
+  section,
+  div {
+    background: transparent !important;
+    box-shadow: none !important;
+    color: inherit !important;
+  }
+
+  /* Page break rules */
+  article,
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  h1, h2, h3, h4 {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    color: #000000 !important;
+  }
+
+  /* Text contrast on paper */
+  p, span, dd, dt, li {
+    color: #1f2937 !important;
+  }
+
+  a {
+    color: #000000 !important;
+    text-decoration: underline !important;
+  }
+
+  /* Badges and tags in print */
+  [data-slot="badge"],
+  .badge {
+    border: 1px solid #d1d5db !important;
+    color: #374151 !important;
+    background: #f3f4f6 !important;
+  }
+}
+
