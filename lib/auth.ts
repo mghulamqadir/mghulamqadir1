@@ -9,6 +9,8 @@ import { collection } from "@/lib/database/mongodb";
 type Profile = { id: string; email?: string; password_hash?: string; role: "admin" | "editor" };
 
 export const authOptions: NextAuthOptions = {
+  // Deliberately optional at module evaluation time so public static routes can build
+  // without auth credentials. NextAuth rejects missing secrets when auth is invoked in production.
   secret: env.AUTH_SECRET,
   session: { strategy: "jwt", maxAge: 60 * 60 * 8 },
   pages: { signIn: "/login" },

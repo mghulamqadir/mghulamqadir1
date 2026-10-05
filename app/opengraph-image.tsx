@@ -185,7 +185,7 @@ export default async function OGImage() {
               fontFamily: "monospace",
             }}
           >
-            mghulamqadir.me
+            mghulamqadir1.vercel.app
           </div>
         </div>
       </div>
