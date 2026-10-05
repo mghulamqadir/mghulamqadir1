@@ -1,25 +1,15 @@
-import { z } from "zod";
+import { z } from "@/lib/schema";
 
-const isProduction = process.env.NODE_ENV === "production";
-const isBuild =
-  process.env.NEXT_PHASE === "phase-production-build" ||
-  process.env.npm_lifecycle_event === "build" ||
-  Boolean(process.env.NEXT_IS_BUILDING);
-
-const defaultSiteUrl = isProduction
-  ? "https://mghulamqadir1.vercel.app"
-  : "http://localhost:3000";
-
-const defaultAuthSecret = "development_or_build_secret_32_chars_minimum";
+const defaultSiteUrl = "https://mghulamqadir1.vercel.app";
 
 const envSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().optional(),
   MONGODB_URI: z.string().min(1).optional(),
   MONGO_URI: z.string().min(1).optional(),
   MONGODB_DB_NAME: z.string().min(1).default("portfolio"),
-  AUTH_SECRET: z.string().optional(),
-  NEXTAUTH_SECRET: z.string().optional(),
-  JWT_SECRET: z.string().optional(),
+  AUTH_SECRET: z.string().trim().min(32).optional(),
+  NEXTAUTH_SECRET: z.string().trim().min(32).optional(),
+  JWT_SECRET: z.string().trim().min(32).optional(),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
@@ -38,23 +28,7 @@ const envSchema = z.object({
     siteUrl = `https://${siteUrl}`;
   }
 
-  // Resolve auth secret from AUTH_SECRET, NEXTAUTH_SECRET, or JWT_SECRET
-  const providedSecret = (raw.AUTH_SECRET || raw.NEXTAUTH_SECRET || raw.JWT_SECRET || "").trim();
-  let resolvedSecret = providedSecret;
-
-  if (!resolvedSecret) {
-    // Fall back to safe 32-char placeholder during build or development so static compilation never fails
-    resolvedSecret = defaultAuthSecret;
-    if (isProduction && !isBuild) {
-      console.warn(
-        "[SECURITY WARNING] Neither AUTH_SECRET nor NEXTAUTH_SECRET is set in production. Using fallback secret. Please configure a 32+ character AUTH_SECRET in your production environment."
-      );
-    }
-  } else if (resolvedSecret.length < 32 && isProduction && !isBuild) {
-    console.warn(
-      `[SECURITY WARNING] AUTH_SECRET is only ${resolvedSecret.length} characters long. A secret of at least 32 characters is strongly recommended.`
-    );
-  }
+  const resolvedSecret = raw.AUTH_SECRET || raw.NEXTAUTH_SECRET || raw.JWT_SECRET;
 
   return {
     ...raw,
@@ -70,11 +44,17 @@ const parsedEnv = envSchema.parse(process.env);
 export const env = { 
   ...parsedEnv, 
   NEXT_PUBLIC_SITE_URL: parsedEnv.NEXT_PUBLIC_SITE_URL as string,
-  AUTH_SECRET: parsedEnv.AUTH_SECRET as string,
+  AUTH_SECRET: parsedEnv.AUTH_SECRET,
   MONGODB_URI: parsedEnv.MONGODB_URI ?? parsedEnv.MONGO_URI, 
   BREVO_SENDER_EMAIL: parsedEnv.BREVO_SENDER_EMAIL ?? parsedEnv.SENDER_EMAIL, 
   BREVO_SENDER_NAME: parsedEnv.SENDER_NAME ?? parsedEnv.BREVO_SENDER_NAME 
 };
+
+/** Call only in an authentication runtime path, never from public static rendering. */
+export function requireAuthSecret(): string {
+  if (!env.AUTH_SECRET) throw new Error("AUTH_SECRET (or NEXTAUTH_SECRET/JWT_SECRET) must be set to at least 32 characters.");
+  return env.AUTH_SECRET;
+}
 
 export function hasMongo() {
   return Boolean(env.MONGODB_URI);
