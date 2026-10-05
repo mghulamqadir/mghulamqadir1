@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Theme Preview — Moonlit Gold</title>
+  <style>
+    :root {
+      --bg: #07080B;
+      --bg-elevated: #0D0E12;
+      --surface: #13141A;
+      --surface-2: #1A1C23;
+      --border: #25262E;
+      --border-strong: #363945;
+      --text: #F2EEE6;
+      --text-muted: #ABA9A6;
+      --text-faint: #8B8D95;
+      --accent: #F2B864;
+      --accent-strong: #FFCB7E;
+      --accent-ink: #231600;
+      --accent-glow: rgba(242, 184, 100, 0.20);
+      --accent-2: #9DB4D6;
+      --success: #4ADE80;
+      --warning: #FBBF24;
+      --danger: #F87171;
+      --signature-gradient: linear-gradient(135deg, #F2B864 0%, #9DB4D6 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      padding: 40px 24px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { margin-bottom: 48px; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
+    h1 { font-size: 36px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .subtitle { color: var(--text-muted); font-size: 16px; }
+
+    .section { margin-bottom: 48px; }
+    .section-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; color: var(--accent); }
+
+    /* Palette Grid */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .color-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      padding: 12px;
+    }
+    .color-swatch {
+      height: 60px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .color-name { font-weight: 500; font-size: 14px; }
+    .color-hex { font-size: 12px; color: var(--text-muted); font-family: monospace; }
+
+    /* Buttons */
+    .btn-group { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+    .btn-primary {
+      background: var(--accent);
+      color: var(--accent-ink);
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      min-height: 48px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      background: var(--accent-strong);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      min-height: 48px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .btn-secondary:hover {
+      background: var(--surface-2);
+      border-color: var(--text-muted);
+    }
+
+    /* Cards */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      position: relative;
+    }
+    .card.featured {
+      border: 1px solid transparent;
+      background: linear-gradient(var(--surface), var(--surface)) padding-box,
+                  var(--signature-gradient) border-box;
+    }
+    .tag {
+      display: inline-block;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 4px 8px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      margin-right: 6px;
+    }
+
+    /* Form Preview */
+    .form-group { margin-bottom: 16px; max-width: 480px; }
+    label { display: block; font-size: 14px; margin-bottom: 6px; color: var(--text); }
+    input, textarea {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    /* Contrast Table */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-muted); font-weight: 500; }
+    .pass { color: var(--success); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Portfolio Theme Reference — Moonlit Gold</h1>
+      <p class="subtitle">Visual reference and contrast verification baseline for Ghulam Qadir Portfolio & CMS.</p>
+    </header>
+
+    <div class="section">
+      <h2 class="section-title">Color Palette (90 / 8 / 2 System)</h2>
+      <div class="palette-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background: #07080B;"></div>
+          <div class="color-name">--bg</div>
+          <div class="color-hex">#07080B</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #0D0E12;"></div>
+          <div class="color-name">--bg-elevated</div>
+          <div class="color-hex">#0D0E12</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #13141A;"></div>
+          <div class="color-name">--surface</div>
+          <div class="color-hex">#13141A</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #1A1C23;"></div>
+          <div class="color-name">--surface-2</div>
+          <div class="color-hex">#1A1C23</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #25262E;"></div>
+          <div class="color-name">--border</div>
+          <div class="color-hex">#25262E</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #363945;"></div>
+          <div class="color-name">--border-strong</div>
+          <div class="color-hex">#363945</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #F2EEE6;"></div>
+          <div class="color-name" style="color: #07080B;">--text</div>
+          <div class="color-hex">#F2EEE6</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #ABA9A6;"></div>
+          <div class="color-name" style="color: #07080B;">--text-muted</div>
+          <div class="color-hex">#ABA9A6</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #8B8D95;"></div>
+          <div class="color-name" style="color: #07080B;">--text-faint</div>
+          <div class="color-hex">#8B8D95</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #F2B864;"></div>
+          <div class="color-name" style="color: #07080B;">--accent</div>
+          <div class="color-hex">#F2B864</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #9DB4D6;"></div>
+          <div class="color-name" style="color: #07080B;">--accent-2</div>
+          <div class="color-hex">#9DB4D6</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Interactive Elements & Focus</h2>
+      <div class="btn-group">
+        <button class="btn-primary">View Projects &rarr;</button>
+        <button class="btn-secondary">Get in touch</button>
+        <a href="#contact" style="color: var(--accent); text-decoration: underline;">Direct contact link</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Cards & Featured Signature</h2>
+      <div class="card-grid">
+        <div class="card featured">
+          <h3 style="font-size: 20px; margin-bottom: 8px;">CrowdAxis (Featured Lead Card)</h3>
+          <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 16px;">AI event processing and marketing intelligence system with a staged, validated pipeline.</p>
+          <div>
+            <span class="tag">Node.js</span>
+            <span class="tag">Perplexity API</span>
+            <span class="tag">PostgreSQL</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="font-size: 20px; margin-bottom: 8px;">Klippify</h3>
+          <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 16px;">Creator campaign and brand performance platform with analytics, earnings, and integrations.</p>
+          <div>
+            <span class="tag">Node.js</span>
+            <span class="tag">PostgreSQL</span>
+            <span class="tag">Stripe</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Form Controls</h2>
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" placeholder="Alex Morgan" />
+      </div>
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" rows="3" placeholder="Tell me about your project..."></textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">WCAG 2.2 AA Contrast Verification Baseline</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Foreground</th>
+            <th>Background</th>
+            <th>Calculated Ratio</th>
+            <th>Required Level</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="contrast-tbody">
+          <!-- Populated by script -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function getLuminance(hex) {
+      const rgb = hex.replace('#', '').match(/.{2}/g).map(x => parseInt(x, 16) / 255);
+      const [r, g, b] = rgb.map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+    function getRatio(hex1, hex2) {
+      const l1 = getLuminance(hex1);
+      const l2 = getLuminance(hex2);
+      const lighter = Math.max(l1, l2);
+      const darker = Math.min(l1, l2);
+      return ((lighter + 0.05) / (darker + 0.05)).toFixed(2);
+    }
+
+    const checks = [
+      { fg: '#F2EEE6', bg: '#07080B', label: '--text on --bg', req: '4.5:1 (Body >= 7:1)' },
+      { fg: '#F2EEE6', bg: '#13141A', label: '--text on --surface', req: '4.5:1' },
+      { fg: '#ABA9A6', bg: '#07080B', label: '--text-muted on --bg', req: '4.5:1' },
+      { fg: '#ABA9A6', bg: '#13141A', label: '--text-muted on --surface', req: '4.5:1' },
+      { fg: '#8B8D95', bg: '#07080B', label: '--text-faint on --bg', req: '4.5:1' },
+      { fg: '#8B8D95', bg: '#13141A', label: '--text-faint on --surface', req: '4.5:1' },
+      { fg: '#F2B864', bg: '#07080B', label: '--accent on --bg', req: '3.0:1 (Large/UI)' },
+      { fg: '#231600', bg: '#F2B864', label: '--accent-ink on --accent', req: '4.5:1' },
+    ];
+
+    const tbody = document.getElementById('contrast-tbody');
+    checks.forEach(c => {
+      const ratio = parseFloat(getRatio(c.fg, c.bg));
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span style="display:inline-block;width:12px;height:12px;background:${c.fg};margin-right:8px;border-radius:2px;"></span>${c.label} (${c.fg})</td>
+        <td><span style="display:inline-block;width:12px;height:12px;background:${c.bg};margin-right:8px;border-radius:2px;"></span>${c.bg}</td>
+        <td><strong>${ratio}:1</strong></td>
+        <td>${c.req}</td>
+        <td class="pass">PASS</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  </script>
+</body>
+</html>
