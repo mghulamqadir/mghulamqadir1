@@ -56,7 +56,10 @@ export default async function OGImage() {
                 fontWeight: "bold",
               }}
             >
-              GQ
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                <path d="M19.5 7.5C14.8 7.5 11 11.3 11 16C11 20.7 14.8 24.5 19.5 24.5C16.2 22.5 14.2 19.4 14.2 16C14.2 12.6 16.2 9.5 19.5 7.5Z" fill="#F2B864" />
+                <circle cx="21" cy="12" r="1.5" fill="#FCE1A8" />
+              </svg>
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
               <span style={{ fontSize: "20px", fontWeight: "700", color: "#F0E7DB" }}>

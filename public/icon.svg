@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <rect width="32" height="32" rx="7" fill="#07080B" />
+  <rect x="0.5" y="0.5" width="31" height="31" rx="6.5" stroke="#F2B864" stroke-opacity="0.25" />
+  <path d="M19.5 7.5C14.8056 7.5 11 11.3056 11 16C11 20.6944 14.8056 24.5 19.5 24.5C16.1863 22.5 14.2 19.4 14.2 16C14.2 12.6 16.1863 9.5 19.5 7.5Z" fill="url(#moon-grad)" />
+  <circle cx="21" cy="12" r="1.5" fill="#FCE1A8" />
+  <defs>
+    <linearGradient id="moon-grad" x1="11" y1="7.5" x2="19.5" y2="24.5" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCE1A8" />
+      <stop offset="0.5" stop-color="#F2B864" />
+      <stop offset="1" stop-color="#C98B27" />
+    </linearGradient>
+  </defs>
+</svg>

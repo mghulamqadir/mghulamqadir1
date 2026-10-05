@@ -8,6 +8,7 @@ import { MobileNav } from "./mobile-nav";
 import { Button } from "@/components/ui/button";
 import { GitHubIcon, LinkedInIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
+import { BrandMark } from "@/components/brand/brand-mark";
 
 const NAV_ITEMS = [
   { label: "About", href: "/about" },
@@ -27,8 +28,8 @@ export function Header() {
           href="/"
           className="group flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg p-1"
         >
-          <div className="w-8 h-8 rounded-lg bg-surface-2 border border-border group-hover:border-accent/50 flex items-center justify-center font-mono font-bold text-xs text-text transition-colors shadow-sm">
-            GQ
+          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-2 transition-colors shadow-sm group-hover:border-accent/50">
+            <BrandMark size={32} />
           </div>
           <div className="flex flex-col">
             <span className="font-semibold text-sm tracking-tight text-text group-hover:text-accent transition-colors">
