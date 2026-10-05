@@ -5,9 +5,9 @@
 
 | Phase | Description | Status | Commit | Gate Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Phase 0** | Read-only review, baseline screenshots, Lighthouse & JS metrics, portrait inspection | **COMPLETE** | *pending commit* | Passed |
-| **Phase 1** | Design tokens (@theme in globals.css, contrast-check script, alternate palettes, typography) | *In Progress* | — | — |
-| **Phase 2** | Shell & UI primitives (Header, Footer, Button, Card, Badge, Input, focus rings) | *Pending* | — | — |
+| **Phase 0** | Read-only review, baseline screenshots, Lighthouse & JS metrics, portrait inspection | **COMPLETE** | `4ad7f7d` | Passed |
+| **Phase 1** | Design tokens (@theme in globals.css, contrast-check script, alternate palettes, typography) | **COMPLETE** | *pending commit* | Passed |
+| **Phase 2** | Shell & UI primitives (Header, Footer, Button, Card, Badge, Input, focus rings) | *In Progress* | — | — |
 | **Phase 3** | Hero with portrait (5-second test, proof strip, 2-column layout, optimized image) | *Pending* | — | — |
 | **Phase 4** | Homepage sections (How I build band, expertise cards, lead project card, philosophy teaser) | *Pending* | — | — |
 | **Phase 5** | Inner pages (/about, /projects, /projects/[slug], /experience, /contact, 404, /login) | *Pending* | — | — |

@@ -1,9 +1,35 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SeoJsonLd } from "@/components/seo-json-ld";
 import { env } from "@/lib/env";
+
+const geistSans = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: "italic",
+  variable: "--font-instrument-serif",
+  display: "swap",
+});
+
+export const viewport: Viewport = {
+  themeColor: "#07080B",
+  colorScheme: "dark",
+};
 
 export const metadata: Metadata = {
   title: {
@@ -37,10 +63,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased dark"
+      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased dark`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-[#09090b] text-[#fafafa] bg-grid-pattern selection:bg-[#5b8cff]/30 selection:text-white">
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-[#5b8cff] focus:px-4 focus:py-2">Skip to content</a>
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-bg text-text selection:bg-accent/30 selection:text-text font-sans">
+        <div className="film-grain" aria-hidden="true" />
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-accent focus:text-accent-ink focus:px-4 focus:py-2 focus:font-semibold"
+        >
+          Skip to content
+        </a>
         <SeoJsonLd />
         <Header />
         <main id="main-content" className="flex-1 flex flex-col relative">{children}</main>
