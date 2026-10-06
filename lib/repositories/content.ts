@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import type { ContentResource } from "@/lib/content/content-config";
 import { collection } from "@/lib/database/mongodb";
 import { type RecordWithId, withoutMongoId } from "@/lib/database/documents";
-import type { Experience, Technology, Testimonial } from "@/lib/types";
+import type { Certification, Experience, Technology, Testimonial } from "@/lib/types";
 
 const timestamped = new Set(["projects", "technologies", "testimonials", "experiences", "skills", "education", "certifications"]);
 
@@ -14,6 +14,7 @@ export async function getExperiences() {
 }
 export async function getTestimonials() { return collection<RecordWithId>("testimonials").then((items) => items.find({ status: "published", featured: true }).sort({ sort_order: 1 }).limit(3).toArray()).then((rows) => rows.map(withoutMongoId) as unknown as Testimonial[]); }
 export async function getTechnologies() { return collection<RecordWithId>("technologies").then((items) => items.find({}).sort({ category: 1, sort_order: 1 }).toArray()).then((rows) => rows.map(withoutMongoId) as unknown as Technology[]); }
+export async function getCertifications() { return collection<RecordWithId>("certifications").then((items) => items.find({}).sort({ sort_order: 1 }).toArray()).then((rows) => rows.map(withoutMongoId) as unknown as Certification[]); }
 
 export async function listResource(resource: ContentResource) {
   return collection<RecordWithId>(resource).then((items) => items.find({}).sort({ sort_order: 1 }).toArray()).then((rows) => rows.map(withoutMongoId) as Record<string, unknown>[]);

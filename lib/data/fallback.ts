@@ -1,4 +1,4 @@
-import type { Experience, Project, Testimonial, Technology } from "@/lib/types";
+import type { Certification, Experience, Project, Testimonial, Technology } from "@/lib/types";
 
 export const fallbackProjects: Project[] = [
   {
@@ -60,7 +60,7 @@ export const fallbackProjects: Project[] = [
     title: "Alevo",
     slug: "alevo",
     company: "Alevo",
-    role: "Full Stack Engineer",
+    role: "Full Stack Developer",
     category: "AI",
     status: "published",
     featured: true,
@@ -88,7 +88,7 @@ export const fallbackProjects: Project[] = [
     title: "CampGenie",
     slug: "campgenie",
     company: "CampGenie",
-    role: "Full Stack Engineer",
+    role: "Backend Engineer",
     category: "Marketplace",
     status: "published",
     featured: true,
@@ -194,14 +194,20 @@ export const fallbackProjects: Project[] = [
 ];
 
 export const fallbackExperiences: Experience[] = [
-  { id: "zweidevs", company: "Zweidevs Private Limited", role: "Backend Engineer", location: "Lahore, Pakistan", start_date: "2025-01-01", current_role: true, description: "Backend services, AI/RAG workflows, database optimization, and API integrations.", sort_order: 1, technologies: ["Node.js", "AI", "PostgreSQL", "Supabase"] },
-  { id: "cinqdev", company: "Cinqdev Solutions", role: "Backend Engineer", location: "Lahore, Pakistan", start_date: "2024-01-01", end_date: "2025-01-01", current_role: false, description: "REST APIs, multi-tenant databases, payment webhooks, and authentication flows.", sort_order: 2, technologies: ["Node.js", "Express", "PostgreSQL", "Stripe"] },
-  { id: "stepinn", company: "StepInn Solution", role: "Node.js Developer", location: "Lahore, Pakistan", start_date: "2023-01-01", end_date: "2024-01-01", current_role: false, description: "Server-side logic, database integrations, background jobs, and test suites.", sort_order: 3, technologies: ["Node.js", "MongoDB", "Express"] },
+  { id: "zweidevs", company: "Zweidevs Private Limited", role: "Backend Engineer", location: "Lahore, Pakistan", start_date: "2025-08-01", current_role: true, description: "Production backend services, REST APIs, AI/RAG workflows, secure integrations, and cloud support.", sort_order: 1, technologies: ["Node.js", "AI", "PostgreSQL", "Supabase", "MongoDB"] },
+  { id: "cinqdev", company: "Cinqdev Solutions", role: "Backend Engineer", location: "Lahore, Pakistan", start_date: "2024-12-01", end_date: "2025-08-01", current_role: false, description: "Backend and full-stack applications, RAG systems, RBAC, secure REST APIs, and third-party integrations.", sort_order: 2, technologies: ["Node.js", "Express", "React", "FastAPI", "PostgreSQL", "MongoDB"] },
+  { id: "stepinn", company: "StepInn Solution", role: "Node.js Developer", location: "Lahore, Pakistan", start_date: "2023-12-01", end_date: "2024-11-01", current_role: false, description: "REST APIs, MongoDB schemas, database optimization, reliability fixes, and performance improvements.", sort_order: 3, technologies: ["Node.js", "MongoDB", "Express"] },
 ];
 
 export const fallbackTestimonials: Testimonial[] = [
   { id: "t1", name: "Sarah Jenkins", job_title: "VP Engineering", company: "Klippify", testimonial: "Ghulam architected our billing infrastructure flawlessly. Transactions have never been more reliable.", featured: true, status: "published", sort_order: 1 },
   { id: "t2", name: "Michael Chen", job_title: "CTO", company: "CrowdAxis", testimonial: "His deep understanding of AI pipelines and event orchestration completely transformed our intelligence product.", featured: true, status: "published", sort_order: 2 }
+];
+
+export const fallbackCertifications: Certification[] = [
+  { id: "complete-ai-agent-hackathon", name: "Complete AI Agent Hackathon", issuer: "lablab.ai", issue_date: "2026-02-23", date_label: "Feb 23 – Mar 2, 2026", credential_id: "CMMKL3UIS00074X0SSCUTRBEB", credential_url: "https://lablab.ai/u/@mghulamqadir/ai-hackathons/complete-ai-agent-hackathon/certificate", sort_order: 1 },
+  { id: "deriv-ai-talent-sprint", name: "Deriv AI Talent Sprint", issuer: "lablab.ai", issue_date: "2026-02-06", date_label: "Feb 6 – 15, 2026", credential_id: "CMLRXUWJQ003D700SKNRZIBP1", credential_url: "https://lablab.ai/u/@mghulamqadir/ai-hackathons/deriv-ai-talent-sprint/certificate", sort_order: 2 },
+  { id: "launch-fund-ai-meets-robotics", name: "Launch and Fund Your Own Startup — Edition 1", issuer: "lablab.ai", issue_date: "2026-02-06", date_label: "Feb 6 – 7, 2026", credential_id: "CMLF2QVZM009FBB0SRTG2LHTF", credential_url: "https://lablab.ai/u/@mghulamqadir/ai-hackathons/launch-fund-ai-meets-robotics/certificate", sort_order: 3 },
 ];
 
 export const fallbackTechnologies: Technology[] = [

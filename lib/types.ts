@@ -12,4 +12,5 @@ export interface Project {
 }
 export interface Experience { id: string; company: string; role: string; location?: string | null; start_date: string; end_date?: string | null; current_role: boolean; description?: string | null; highlights?: string[]; technologies?: string[]; sort_order: number; }
 export interface Testimonial { id: string; name: string; job_title?: string | null; company?: string | null; testimonial: string; source_url?: string | null; featured: boolean; status: "draft" | "published"; sort_order: number; }
+export interface Certification { id: string; name: string; issuer?: string | null; issue_date?: string | null; date_label?: string | null; credential_id?: string | null; credential_url?: string | null; image_url?: string | null; sort_order: number; }
 export interface SiteSettings { key: string; value: Record<string, unknown>; }

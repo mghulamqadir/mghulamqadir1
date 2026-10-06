@@ -1,6 +1,6 @@
 import { cache } from "react";
-import { fallbackExperiences, fallbackProjects, fallbackTechnologies, fallbackTestimonials } from "@/lib/data/fallback";
-import type { Experience, Project, Technology, Testimonial } from "@/lib/types";
+import { fallbackCertifications, fallbackExperiences, fallbackProjects, fallbackTechnologies, fallbackTestimonials } from "@/lib/data/fallback";
+import type { Certification, Experience, Project, Technology, Testimonial } from "@/lib/types";
 import { hasMongo } from "@/lib/env";
 import * as repository from "@/lib/repositories";
 
@@ -28,3 +28,4 @@ export const getExperiences = cache(async (): Promise<Experience[]> => {
 });
 export const getTestimonials = cache(async (): Promise<Testimonial[]> => { if (!hasMongo()) return fallbackTestimonials; try { const testimonials = await repository.getTestimonials(); return testimonials.length ? testimonials : fallbackTestimonials; } catch (error) { console.error("Serving fallback testimonials", { message: error instanceof Error ? error.message : "unknown" }); return fallbackTestimonials; } });
 export const getTechnologies = cache(async (): Promise<Technology[]> => { if (!hasMongo()) return fallbackTechnologies; try { const technologies = await repository.getTechnologies(); return technologies.length ? technologies : fallbackTechnologies; } catch (error) { console.error("Serving fallback technologies", { message: error instanceof Error ? error.message : "unknown" }); return fallbackTechnologies; } });
+export const getCertifications = cache(async (): Promise<Certification[]> => { if (!hasMongo()) return fallbackCertifications; try { const certifications = await repository.getCertifications(); return certifications.length ? certifications : fallbackCertifications; } catch (error) { console.error("Serving fallback certifications", { message: error instanceof Error ? error.message : "unknown" }); return fallbackCertifications; } });
