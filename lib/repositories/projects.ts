@@ -5,7 +5,16 @@ import type { Project, ProjectImage, Technology } from "@/lib/types";
 
 export async function listProjects(status?: "published") {
   const query = status ? { status } : {};
-  return (await collection<RecordWithId>("projects")).find(query).sort({ sort_order: 1 }).toArray().then((rows) => rows.map(withoutMongoId) as unknown as Project[]);
+  return (await collection<RecordWithId>("projects")).find(query).sort({ sort_order: 1, updated_at: -1 }).toArray().then((rows) => {
+    // A legacy import can leave duplicate slugs. Prefer the canonical slug ID
+    // and never expose duplicate entries to project navigation.
+    const unique = new Map<string, RecordWithId>();
+    for (const row of rows) {
+      const existing = unique.get(String(row.slug));
+      if (!existing || row.id === row.slug) unique.set(String(row.slug), row);
+    }
+    return [...unique.values()].map(withoutMongoId) as unknown as Project[];
+  });
 }
 
 async function hydrateProjects(rows: Project[]) {
@@ -27,7 +36,8 @@ async function hydrateProjects(rows: Project[]) {
 
 export async function getPublishedProjects() { return hydrateProjects(await listProjects("published")); }
 export async function getPublishedProject(slug: string) {
-  const row = withoutMongoId(await collection<RecordWithId>("projects").then((items) => items.findOne({ slug, status: "published" }))) as unknown as Project | null;
+  const rows = await collection<RecordWithId>("projects").then((items) => items.find({ slug, status: "published" }).sort({ updated_at: -1 }).toArray());
+  const row = withoutMongoId(rows.find((item) => item.id === slug) ?? rows[0] ?? null) as unknown as Project | null;
   return row ? (await hydrateProjects([row]))[0] : null;
 }
 export async function createProject(value: Record<string, unknown>) {
