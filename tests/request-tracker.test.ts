@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import {
   getClientIp,
   cleanIp,
+  isPrefetchRequest,
   shouldIgnoreRequest,
 } from "@/lib/logging/request-tracker";
 
@@ -60,32 +61,90 @@ describe("request-tracker: getClientIp", () => {
   });
 });
 
+describe("request-tracker: isPrefetchRequest", () => {
+  it("detects Next.js next-router-prefetch header", () => {
+    const req = createMockRequest("https://portfolio.local/about", {
+      "next-router-prefetch": "1",
+    });
+    expect(isPrefetchRequest(req)).toBe(true);
+  });
+
+  it("detects Next.js next-router-segment-prefetch header", () => {
+    const req = createMockRequest("https://portfolio.local/about", {
+      "next-router-segment-prefetch": "1",
+    });
+    expect(isPrefetchRequest(req)).toBe(true);
+  });
+
+  it("detects browser standard purpose: prefetch header", () => {
+    const req = createMockRequest("https://portfolio.local/projects", {
+      purpose: "prefetch",
+    });
+    expect(isPrefetchRequest(req)).toBe(true);
+  });
+
+  it("detects browser standard sec-purpose: prefetch header", () => {
+    const req = createMockRequest("https://portfolio.local/contact", {
+      "sec-purpose": "prefetch",
+    });
+    expect(isPrefetchRequest(req)).toBe(true);
+  });
+
+  it("returns false for regular user navigation requests", () => {
+    const req = createMockRequest("https://portfolio.local/about", {
+      accept: "text/html,application/xhtml+xml",
+    });
+    expect(isPrefetchRequest(req)).toBe(false);
+  });
+});
+
 describe("request-tracker: shouldIgnoreRequest", () => {
+  it("ignores prefetch requests", () => {
+    const req = createMockRequest("https://portfolio.local/about", {
+      "next-router-prefetch": "1",
+    });
+    expect(shouldIgnoreRequest(req, "1.2.3.4")).toBe(true);
+  });
+
   it("ignores internal Next.js assets", () => {
     const req = createMockRequest("https://portfolio.local/_next/static/chunks/app.js");
-    expect(shouldIgnoreRequest(req)).toBe(true);
+    expect(shouldIgnoreRequest(req, "1.2.3.4")).toBe(true);
   });
 
   it("ignores favicon and brand vector assets", () => {
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/favicon.ico"))).toBe(true);
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/icon.svg"))).toBe(true);
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/logo.svg"))).toBe(true);
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/robots.txt"))).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/favicon.ico"), "1.2.3.4")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/icon.svg"), "1.2.3.4")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/logo.svg"), "1.2.3.4")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/robots.txt"), "1.2.3.4")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/opengraph-image"), "1.2.3.4")).toBe(true);
   });
 
   it("ignores static image files by extension", () => {
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/images/projects/klippify.webp"))).toBe(true);
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/photo.jpg"))).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/images/projects/klippify.webp"), "1.2.3.4")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/photo.jpg"), "1.2.3.4")).toBe(true);
   });
 
-  it("tracks valid page requests", () => {
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/"))).toBe(false);
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/projects"))).toBe(false);
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/projects/klippify"))).toBe(false);
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/contact"))).toBe(false);
+  it("tracks valid initial page requests", () => {
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/"), "10.0.0.1")).toBe(false);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/projects"), "10.0.0.2")).toBe(false);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/projects/klippify"), "10.0.0.3")).toBe(false);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/contact"), "10.0.0.4")).toBe(false);
+  });
+
+  it("deduplicates rapid burst GET requests from the exact same IP and path", () => {
+    const ip = "192.168.10.99";
+    const req1 = createMockRequest("https://portfolio.local/unique-test-path");
+    const req2 = createMockRequest("https://portfolio.local/unique-test-path");
+
+    // First hit is accepted
+    expect(shouldIgnoreRequest(req1, ip)).toBe(false);
+    // Second hit within 1.5s is ignored
+    expect(shouldIgnoreRequest(req2, ip)).toBe(true);
   });
 
   it("tracks API endpoints", () => {
-    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/api/contact"))).toBe(false);
+    const req = createMockRequest("https://portfolio.local/api/contact", {}, );
+    // Custom method POST
+    expect(shouldIgnoreRequest(req, "10.0.0.5")).toBe(false);
   });
 });
