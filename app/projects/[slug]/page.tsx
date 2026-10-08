@@ -15,7 +15,8 @@ export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const projects = await getProjects();
-  return projects.map((p) => ({ slug: p.slug }));
+  const uniqueSlugs = Array.from(new Set(projects.map((p) => p.slug).filter(Boolean)));
+  return uniqueSlugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -53,12 +54,20 @@ export default async function ProjectPage({
   params: Promise<{ slug: string }>;
 }) {
   const slug = (await params).slug;
-  const [project, allProjects] = await Promise.all([
+  const [project, rawProjects] = await Promise.all([
     getProject(slug),
     getProjects(),
   ]);
 
   if (!project) notFound();
+
+  // Deduplicate projects by slug to ensure clean linear navigation
+  const seenSlugs = new Set<string>();
+  const allProjects = rawProjects.filter((p) => {
+    if (!p.slug || seenSlugs.has(p.slug)) return false;
+    seenSlugs.add(p.slug);
+    return true;
+  });
 
   // Find previous and next project for footer navigation
   const currentIndex = allProjects.findIndex((p) => p.slug === project.slug);

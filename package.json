@@ -13,8 +13,9 @@
         "db:indexes": "node scripts/create-indexes.mjs",
         "db:bootstrap-admin": "node scripts/bootstrap-admin.mjs",
     "db:import-supabase": "node scripts/import-supabase.mjs",
-    "db:copy-test-content": "node scripts/copy-mongo-content.mjs",
-        "db:seed": "node scripts/seed-cms-data.mjs"
+        "db:copy-test-content": "node scripts/copy-mongo-content.mjs",
+        "db:seed": "node scripts/seed-cms-data.mjs",
+        "db:cleanup-projects": "node scripts/cleanup-duplicate-projects.mjs"
     },
     "dependencies": {
         "bcryptjs": "^3.0.3",

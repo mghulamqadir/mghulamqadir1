@@ -14,3 +14,24 @@ export interface Experience { id: string; company: string; role: string; locatio
 export interface Testimonial { id: string; name: string; job_title?: string | null; company?: string | null; testimonial: string; source_url?: string | null; featured: boolean; status: "draft" | "published"; sort_order: number; }
 export interface Certification { id: string; name: string; issuer?: string | null; issue_date?: string | null; date_label?: string | null; credential_id?: string | null; credential_url?: string | null; image_url?: string | null; sort_order: number; }
 export interface SiteSettings { key: string; value: Record<string, unknown>; }
+
+export interface RequestLog {
+  id: string;
+  ip: string;
+  method: string;
+  path: string;
+  query?: string | null;
+  user_agent?: string | null;
+  referer?: string | null;
+  country?: string | null;
+  city?: string | null;
+  region?: string | null;
+  created_at: string;
+}
+
+export interface RequestLogStats {
+  totalToday: number;
+  uniqueIpsToday: number;
+  totalAllTime: number;
+  topPaths: { path: string; count: number }[];
+}

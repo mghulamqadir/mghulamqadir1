@@ -6,7 +6,19 @@ import * as repository from "@/lib/repositories";
 
 export const getProjects = cache(async (): Promise<Project[]> => {
   if (!hasMongo()) return fallbackProjects;
-  try { const projects = await repository.getPublishedProjects(); return projects.length ? projects : fallbackProjects; } catch (error) { console.error("Serving fallback projects", { message: error instanceof Error ? error.message : "unknown" }); return fallbackProjects; }
+  try {
+    const raw = await repository.getPublishedProjects();
+    const projects = raw.length ? raw : fallbackProjects;
+    const seen = new Set<string>();
+    return projects.filter((p) => {
+      if (!p.slug || seen.has(p.slug)) return false;
+      seen.add(p.slug);
+      return true;
+    });
+  } catch (error) {
+    console.error("Serving fallback projects", { message: error instanceof Error ? error.message : "unknown" });
+    return fallbackProjects;
+  }
 });
 export async function getFeaturedProjects() { return (await getProjects()).filter((p) => p.featured).slice(0, 4); }
 export const getProject = cache(async (slug: string): Promise<Project | null> => {
