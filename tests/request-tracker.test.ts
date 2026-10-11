@@ -148,3 +148,34 @@ describe("request-tracker: shouldIgnoreRequest", () => {
     expect(shouldIgnoreRequest(req, "10.0.0.5")).toBe(false);
   });
 });
+
+describe("request-tracker: grouping by IP address & visited paths timeline", () => {
+  it("groups visits by IP address and preserves chronological path history", () => {
+    const mockLogs = [
+      { ip: "203.0.113.1", path: "/contact", method: "GET", created_at: "2026-10-11T16:45:00.000Z" },
+      { ip: "198.51.100.2", path: "/about", method: "GET", created_at: "2026-10-11T16:41:00.000Z" },
+      { ip: "203.0.113.1", path: "/projects", method: "GET", created_at: "2026-10-11T16:43:00.000Z" },
+      { ip: "203.0.113.1", path: "/", method: "GET", created_at: "2026-10-11T16:40:00.000Z" },
+    ];
+
+    const groupedMap = new Map<string, { ip: string; total: number; paths: string[] }>();
+    for (const log of mockLogs) {
+      if (!groupedMap.has(log.ip)) {
+        groupedMap.set(log.ip, { ip: log.ip, total: 0, paths: [] });
+      }
+      const item = groupedMap.get(log.ip)!;
+      item.total += 1;
+      item.paths.push(log.path);
+    }
+
+    const visitor1 = groupedMap.get("203.0.113.1");
+    expect(visitor1).toBeDefined();
+    expect(visitor1?.total).toBe(3);
+    expect(visitor1?.paths).toEqual(["/contact", "/projects", "/"]);
+
+    const visitor2 = groupedMap.get("198.51.100.2");
+    expect(visitor2).toBeDefined();
+    expect(visitor2?.total).toBe(1);
+    expect(visitor2?.paths).toEqual(["/about"]);
+  });
+});

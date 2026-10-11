@@ -1,7 +1,8 @@
 import { randomUUID } from "crypto";
+import type { Document } from "mongodb";
 import { collection } from "@/lib/database/mongodb";
 import { withoutMongoId, type RecordWithId } from "@/lib/database/documents";
-import type { RequestLog, RequestLogStats } from "@/lib/types";
+import type { IpGroupedLog, PathVisit, RequestLog, RequestLogStats } from "@/lib/types";
 import { hasMongo } from "@/lib/env";
 
 export type RequestLogInput = Omit<RequestLog, "id" | "created_at">;
@@ -67,6 +68,103 @@ export async function getRequestLogs(options: {
       message: error instanceof Error ? error.message : "unknown",
     });
     return { logs: [], total: 0 };
+  }
+}
+
+export async function getGroupedRequestLogsByIp(options: {
+  page?: number;
+  limit?: number;
+  searchIp?: string;
+  path?: string;
+} = {}): Promise<{ groups: IpGroupedLog[]; total: number }> {
+  if (!hasMongo()) return { groups: [], total: 0 };
+  try {
+    const { page = 1, limit = 50, searchIp, path } = options;
+    const filter: Record<string, unknown> = {};
+
+    if (searchIp) {
+      filter.ip = { $regex: searchIp.trim(), $options: "i" };
+    }
+    if (path) {
+      filter.path = { $regex: path.trim(), $options: "i" };
+    }
+
+    const col = await collection<RecordWithId>("request_logs");
+    const pipeline: Document[] = [];
+
+    if (Object.keys(filter).length > 0) {
+      pipeline.push({ $match: filter });
+    }
+
+    pipeline.push(
+      { $sort: { created_at: -1 } },
+      {
+        $group: {
+          _id: "$ip",
+          total_requests: { $sum: 1 },
+          last_seen: { $max: "$created_at" },
+          first_seen: { $min: "$created_at" },
+          country: { $first: "$country" },
+          city: { $first: "$city" },
+          region: { $first: "$region" },
+          user_agent: { $first: "$user_agent" },
+          visits: {
+            $push: {
+              method: "$method",
+              path: "$path",
+              query: "$query",
+              created_at: "$created_at",
+            },
+          },
+        },
+      },
+      { $sort: { last_seen: -1 } },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [
+            { $skip: (Math.max(1, page) - 1) * limit },
+            { $limit: limit },
+          ],
+        },
+      }
+    );
+
+    const [result] = await col.aggregate(pipeline).toArray();
+    const total = (result?.metadata?.[0] as { total?: number })?.total ?? 0;
+    const groups: IpGroupedLog[] = ((result?.data ?? []) as Array<{
+      _id: string;
+      total_requests: number;
+      first_seen: string;
+      last_seen: string;
+      country?: string | null;
+      city?: string | null;
+      region?: string | null;
+      user_agent?: string | null;
+      visits?: PathVisit[];
+    }>).map((item) => ({
+      ip: item._id,
+      total_requests: item.total_requests,
+      first_seen: item.first_seen,
+      last_seen: item.last_seen,
+      country: item.country || null,
+      city: item.city || null,
+      region: item.region || null,
+      user_agent: item.user_agent || null,
+      visits: (item.visits || []).map((v) => ({
+        method: v.method,
+        path: v.path,
+        query: v.query || null,
+        created_at: v.created_at,
+      })),
+    }));
+
+    return { groups, total };
+  } catch (error) {
+    console.error("Failed to fetch grouped request logs by IP:", {
+      message: error instanceof Error ? error.message : "unknown",
+    });
+    return { groups: [], total: 0 };
   }
 }
 

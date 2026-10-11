@@ -35,3 +35,22 @@ export interface RequestLogStats {
   totalAllTime: number;
   topPaths: { path: string; count: number }[];
 }
+
+export interface PathVisit {
+  method: string;
+  path: string;
+  query?: string | null;
+  created_at: string;
+}
+
+export interface IpGroupedLog {
+  ip: string;
+  total_requests: number;
+  first_seen: string;
+  last_seen: string;
+  country?: string | null;
+  city?: string | null;
+  region?: string | null;
+  user_agent?: string | null;
+  visits: PathVisit[];
+}
