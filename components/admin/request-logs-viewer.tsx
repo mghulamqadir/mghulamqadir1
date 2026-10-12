@@ -63,6 +63,29 @@ export function RequestLogsViewer({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
+  // Local state for immediate / optimistic UI updates without requiring page reload
+  const [groupedLogs, setGroupedLogs] = useState<IpGroupedLog[]>(initialGroupedLogs);
+  const [logs, setLogs] = useState<RequestLog[]>(initialLogs);
+  const [totalCount, setTotalCount] = useState<number>(total);
+  const [currentStats, setCurrentStats] = useState<RequestLogStats>(stats);
+
+  // Synchronize when server component props change
+  useEffect(() => {
+    setGroupedLogs(initialGroupedLogs);
+  }, [initialGroupedLogs]);
+
+  useEffect(() => {
+    setLogs(initialLogs);
+  }, [initialLogs]);
+
+  useEffect(() => {
+    setTotalCount(total);
+  }, [total]);
+
+  useEffect(() => {
+    setCurrentStats(stats);
+  }, [stats]);
+
   const [ipInput, setIpInput] = useState(searchIp);
   const [pathInput, setPathInput] = useState(searchPath);
   const [copiedIp, setCopiedIp] = useState<string | null>(null);
@@ -82,7 +105,7 @@ export function RequestLogsViewer({
     text: string;
   } | null>(null);
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   // Dismiss delete popup on Escape key
   useEffect(() => {
@@ -181,20 +204,20 @@ export function RequestLogsViewer({
   };
 
   const allCurrentIpsSelected =
-    initialGroupedLogs.length > 0 &&
-    initialGroupedLogs.every((g) => selectedIps.has(g.ip));
+    groupedLogs.length > 0 &&
+    groupedLogs.every((g) => selectedIps.has(g.ip));
 
   const toggleSelectAllIps = () => {
     if (allCurrentIpsSelected) {
       setSelectedIps((prev) => {
         const next = new Set(prev);
-        initialGroupedLogs.forEach((g) => next.delete(g.ip));
+        groupedLogs.forEach((g) => next.delete(g.ip));
         return next;
       });
     } else {
       setSelectedIps((prev) => {
         const next = new Set(prev);
-        initialGroupedLogs.forEach((g) => next.add(g.ip));
+        groupedLogs.forEach((g) => next.add(g.ip));
         return next;
       });
     }
@@ -211,26 +234,26 @@ export function RequestLogsViewer({
   };
 
   const allCurrentLogsSelected =
-    initialLogs.length > 0 &&
-    initialLogs.every((l) => selectedLogIds.has(l.id));
+    logs.length > 0 &&
+    logs.every((l) => selectedLogIds.has(l.id));
 
   const toggleSelectAllLogs = () => {
     if (allCurrentLogsSelected) {
       setSelectedLogIds((prev) => {
         const next = new Set(prev);
-        initialLogs.forEach((l) => next.delete(l.id));
+        logs.forEach((l) => next.delete(l.id));
         return next;
       });
     } else {
       setSelectedLogIds((prev) => {
         const next = new Set(prev);
-        initialLogs.forEach((l) => next.add(l.id));
+        logs.forEach((l) => next.add(l.id));
         return next;
       });
     }
   };
 
-  // Deletion logic execution
+  // Deletion logic execution with immediate local state removal
   const performDelete = async (payload: { ids?: string[]; ips?: string[]; all?: boolean }) => {
     setIsDeleting(true);
     try {
@@ -249,9 +272,43 @@ export function RequestLogsViewer({
 
       const count = data?.deletedCount ?? 0;
       showStatus("success", `Successfully deleted ${count} log record${count === 1 ? "" : "s"}.`);
+
+      // Immediately filter out deleted records from local state without requiring reload
+      if (payload.all) {
+        setGroupedLogs([]);
+        setLogs([]);
+        setTotalCount(0);
+        setCurrentStats({
+          totalToday: 0,
+          uniqueIpsToday: 0,
+          totalAllTime: 0,
+          topPaths: [],
+        });
+      } else if (payload.ips && payload.ips.length > 0) {
+        const ipSet = new Set(payload.ips);
+        setGroupedLogs((prev) => prev.filter((g) => !ipSet.has(g.ip)));
+        setLogs((prev) => prev.filter((l) => !ipSet.has(l.ip)));
+        setTotalCount((prev) =>
+          Math.max(0, prev - (viewMode === "grouped" ? payload.ips!.length : count))
+        );
+        setCurrentStats((prev) => ({
+          ...prev,
+          totalAllTime: Math.max(0, prev.totalAllTime - count),
+        }));
+      } else if (payload.ids && payload.ids.length > 0) {
+        const idSet = new Set(payload.ids);
+        setLogs((prev) => prev.filter((l) => !idSet.has(l.id)));
+        setTotalCount((prev) => Math.max(0, prev - payload.ids!.length));
+        setCurrentStats((prev) => ({
+          ...prev,
+          totalAllTime: Math.max(0, prev.totalAllTime - count),
+        }));
+      }
+
       setSelectedIps(new Set());
       setSelectedLogIds(new Set());
 
+      // Revalidate Next.js server cache in background
       startTransition(() => {
         router.refresh();
       });
@@ -302,7 +359,7 @@ export function RequestLogsViewer({
           </p>
         </div>
 
-        {total > 0 && (
+        {totalCount > 0 && (
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -344,7 +401,7 @@ export function RequestLogsViewer({
             <Activity className="h-4 w-4 text-emerald-400" />
           </div>
           <p className="mt-3 text-3xl font-bold text-white">
-            {stats.totalToday.toLocaleString()}
+            {currentStats.totalToday.toLocaleString()}
           </p>
           <p className="mt-1 text-xs text-[#71717a]">UTC Calendar Day</p>
         </div>
@@ -355,7 +412,7 @@ export function RequestLogsViewer({
             <Users className="h-4 w-4 text-[#6c9cff]" />
           </div>
           <p className="mt-3 text-3xl font-bold text-white">
-            {stats.uniqueIpsToday.toLocaleString()}
+            {currentStats.uniqueIpsToday.toLocaleString()}
           </p>
           <p className="mt-1 text-xs text-[#71717a]">Distinct Client Addresses</p>
         </div>
@@ -366,7 +423,7 @@ export function RequestLogsViewer({
             <Globe className="h-4 w-4 text-amber-400" />
           </div>
           <p className="mt-3 text-3xl font-bold text-white">
-            {stats.totalAllTime.toLocaleString()}
+            {currentStats.totalAllTime.toLocaleString()}
           </p>
           <p className="mt-1 text-xs text-[#71717a]">All-time Log Retention</p>
         </div>
@@ -377,20 +434,20 @@ export function RequestLogsViewer({
             <Compass className="h-4 w-4 text-purple-400" />
           </div>
           <p className="mt-3 font-mono text-lg font-bold text-white truncate">
-            {stats.topPaths[0]?.path || "/"}
+            {currentStats.topPaths[0]?.path || "/"}
           </p>
           <p className="mt-1 text-xs text-[#71717a]">
-            {stats.topPaths[0] ? `${stats.topPaths[0].count.toLocaleString()} visits` : "No visits recorded"}
+            {currentStats.topPaths[0] ? `${currentStats.topPaths[0].count.toLocaleString()} visits` : "No visits recorded"}
           </p>
         </div>
       </div>
 
       {/* Top Paths Bar */}
-      {stats.topPaths.length > 0 && (
+      {currentStats.topPaths.length > 0 && (
         <div className="rounded-xl border border-white/10 bg-[#0f1013] p-4 text-xs font-mono">
           <span className="text-[#71717a] mr-3 uppercase font-semibold">Top Destinations:</span>
           <div className="mt-2 flex flex-wrap gap-2 sm:mt-0 sm:inline-flex">
-            {stats.topPaths.map((p) => (
+            {currentStats.topPaths.map((p) => (
               <button
                 key={p.path}
                 type="button"
@@ -493,7 +550,7 @@ export function RequestLogsViewer({
         /* GROUPED BY IP VIEW */
         <div className="space-y-4">
           {/* Grouped Select-All Toolbar */}
-          {initialGroupedLogs.length > 0 && (
+          {groupedLogs.length > 0 && (
             <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0f1013] px-5 py-3 text-xs font-mono text-[#a1a1aa]">
               <label className="flex items-center gap-3 cursor-pointer select-none">
                 <input
@@ -503,7 +560,7 @@ export function RequestLogsViewer({
                   className="h-4 w-4 rounded border-white/20 bg-[#090a0d] text-[#5b8cff] focus:ring-[#5b8cff] cursor-pointer accent-[#5b8cff]"
                 />
                 <span className="text-white font-medium">Select all on this page</span>
-                <span className="text-[#64748b]">({initialGroupedLogs.length} visitor IPs)</span>
+                <span className="text-[#64748b]">({groupedLogs.length} visitor IPs)</span>
               </label>
 
               {selectedIps.size > 0 && (
@@ -523,12 +580,12 @@ export function RequestLogsViewer({
             </div>
           )}
 
-          {initialGroupedLogs.length === 0 ? (
+          {groupedLogs.length === 0 ? (
             <div className="rounded-2xl border border-white/10 bg-[#121316] p-12 text-center text-[#71717a]">
               No visitor sessions found matching the filter criteria.
             </div>
           ) : (
-            initialGroupedLogs.map((group) => {
+            groupedLogs.map((group) => {
               const isExpanded = expandedIps.has(group.ip);
               const isSelected = selectedIps.has(group.ip);
 
@@ -739,14 +796,14 @@ export function RequestLogsViewer({
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {initialLogs.length === 0 ? (
+                {logs.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-5 py-12 text-center text-[#71717a]">
                       No request logs found matching the filter criteria.
                     </td>
                   </tr>
                 ) : (
-                  initialLogs.map((log) => {
+                  logs.map((log) => {
                     const isExpanded = expandedLogId === log.id;
                     const isSelected = selectedLogIds.has(log.id);
 
@@ -786,9 +843,9 @@ export function RequestLogsViewer({
                                 title="Copy IP"
                               >
                                 {copiedIp === log.ip ? (
-                                  <Check className="h-3 w-3 text-emerald-400" />
+                                  <Check className="h-3.5 w-3.5 text-emerald-400" />
                                 ) : (
-                                  <Copy className="h-3 w-3" />
+                                  <Copy className="h-3.5 w-3.5" />
                                 )}
                               </button>
                             </div>
@@ -939,13 +996,13 @@ export function RequestLogsViewer({
         <div>
           Showing{" "}
           <span className="text-white font-semibold">
-            {total === 0 ? 0 : (currentPage - 1) * pageSize + 1}
+            {totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1}
           </span>{" "}
           to{" "}
           <span className="text-white font-semibold">
-            {Math.min(currentPage * pageSize, total)}
+            {Math.min(currentPage * pageSize, totalCount)}
           </span>{" "}
-          of <span className="text-white font-semibold">{total.toLocaleString()}</span>{" "}
+          of <span className="text-white font-semibold">{totalCount.toLocaleString()}</span>{" "}
           {viewMode === "grouped" ? "unique visitor IPs" : "total requests"}
         </div>
 

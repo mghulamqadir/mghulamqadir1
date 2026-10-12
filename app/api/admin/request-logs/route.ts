@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { requireAdminApi } from "@/lib/api-auth";
 import { audit } from "@/lib/repositories/audit";
 import {
@@ -44,6 +45,8 @@ export async function DELETE(request: Request) {
       ids.slice(0, 10).join(", ") + (ids.length > 10 ? ` (+${ids.length - 10} more)` : "")
     );
   }
+
+  revalidatePath("/admin/logs");
 
   return NextResponse.json({ ok: true, deletedCount });
 }
