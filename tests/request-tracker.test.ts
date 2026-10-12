@@ -142,10 +142,20 @@ describe("request-tracker: shouldIgnoreRequest", () => {
     expect(shouldIgnoreRequest(req2, ip)).toBe(true);
   });
 
-  it("tracks API endpoints", () => {
-    const req = createMockRequest("https://portfolio.local/api/contact", {}, );
-    // Custom method POST
+  it("tracks public API endpoints", () => {
+    const req = createMockRequest("https://portfolio.local/api/contact", {});
     expect(shouldIgnoreRequest(req, "10.0.0.5")).toBe(false);
+  });
+
+  it("ignores all admin CMS and admin API routes", () => {
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/admin"), "10.0.0.10")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/admin/logs"), "10.0.0.10")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/admin/projects"), "10.0.0.10")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/api/admin/request-logs"), "10.0.0.10")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/api/admin/messages"), "10.0.0.10")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/api/admin/settings"), "10.0.0.10")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/api/auth/session"), "10.0.0.10")).toBe(true);
+    expect(shouldIgnoreRequest(createMockRequest("https://portfolio.local/login"), "10.0.0.10")).toBe(true);
   });
 });
 

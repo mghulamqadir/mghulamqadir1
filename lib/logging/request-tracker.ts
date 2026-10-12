@@ -121,10 +121,20 @@ export function shouldIgnoreRequest(request: NextRequest, ip: string): boolean {
 
   const pathname = request.nextUrl.pathname;
 
-  // 2. Ignore Next.js internal assets
+  // 2. Ignore admin, admin API, auth, and login routes completely (only public traffic is logged)
+  if (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/api/admin") ||
+    pathname.startsWith("/api/auth") ||
+    pathname === "/login"
+  ) {
+    return true;
+  }
+
+  // 3. Ignore Next.js internal assets
   if (pathname.startsWith("/_next/")) return true;
 
-  // 3. Ignore dynamic metadata and icon routes
+  // 4. Ignore dynamic metadata and icon routes
   if (pathname.startsWith("/opengraph-image")) return true;
   if (pathname.startsWith("/apple-touch-icon")) return true;
   if (pathname.startsWith("/apple-icon")) return true;

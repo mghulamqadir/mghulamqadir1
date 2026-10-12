@@ -3,11 +3,19 @@ import { NextResponse, type NextRequest, type NextFetchEvent } from "next/server
 import { trackRequest } from "@/lib/logging/request-tracker";
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
-  // 1. Asynchronously track request without delaying client response
-  event.waitUntil(trackRequest(request));
+  const pathname = request.nextUrl.pathname;
+  const isAdminOrAuth =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/api/admin") ||
+    pathname.startsWith("/api/auth") ||
+    pathname === "/login";
+
+  // 1. Asynchronously track public visitor requests only (never admin or auth)
+  if (!isAdminOrAuth) {
+    event.waitUntil(trackRequest(request));
+  }
 
   // 2. Authentication and authorization check for admin routes
-  const pathname = request.nextUrl.pathname;
   const requiresAuth =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/api/admin/") ||
