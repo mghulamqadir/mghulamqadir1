@@ -18,8 +18,11 @@ import {
   ListFilter,
   Layers,
   Clock,
-  ArrowRight,
   Filter,
+  Trash2,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
 } from "lucide-react";
 import type { IpGroupedLog, RequestLog, RequestLogStats } from "@/lib/types";
 
@@ -59,7 +62,23 @@ export function RequestLogsViewer({
   });
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
+  // Multi-selection states
+  const [selectedIps, setSelectedIps] = useState<Set<string>>(new Set());
+  const [selectedLogIds, setSelectedLogIds] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  const showStatus = (type: "success" | "error", text: string) => {
+    setStatusMessage({ type, text });
+    setTimeout(() => {
+      setStatusMessage((current) => (current?.text === text ? null : current));
+    }, 4500);
+  };
 
   const applyFilters = (
     newIp: string,
@@ -109,6 +128,8 @@ export function RequestLogsViewer({
 
   const handleSwitchView = (newView: "grouped" | "stream") => {
     if (newView === viewMode) return;
+    setSelectedIps(new Set());
+    setSelectedLogIds(new Set());
     applyFilters(ipInput, pathInput, newView, 1);
   };
 
@@ -127,19 +148,147 @@ export function RequestLogsViewer({
     });
   };
 
+  // Grouped selection helpers
+  const toggleSelectIp = (ip: string) => {
+    setSelectedIps((prev) => {
+      const next = new Set(prev);
+      if (next.has(ip)) next.delete(ip);
+      else next.add(ip);
+      return next;
+    });
+  };
+
+  const allCurrentIpsSelected =
+    initialGroupedLogs.length > 0 &&
+    initialGroupedLogs.every((g) => selectedIps.has(g.ip));
+
+  const toggleSelectAllIps = () => {
+    if (allCurrentIpsSelected) {
+      setSelectedIps((prev) => {
+        const next = new Set(prev);
+        initialGroupedLogs.forEach((g) => next.delete(g.ip));
+        return next;
+      });
+    } else {
+      setSelectedIps((prev) => {
+        const next = new Set(prev);
+        initialGroupedLogs.forEach((g) => next.add(g.ip));
+        return next;
+      });
+    }
+  };
+
+  // Stream selection helpers
+  const toggleSelectLog = (id: string) => {
+    setSelectedLogIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const allCurrentLogsSelected =
+    initialLogs.length > 0 &&
+    initialLogs.every((l) => selectedLogIds.has(l.id));
+
+  const toggleSelectAllLogs = () => {
+    if (allCurrentLogsSelected) {
+      setSelectedLogIds((prev) => {
+        const next = new Set(prev);
+        initialLogs.forEach((l) => next.delete(l.id));
+        return next;
+      });
+    } else {
+      setSelectedLogIds((prev) => {
+        const next = new Set(prev);
+        initialLogs.forEach((l) => next.add(l.id));
+        return next;
+      });
+    }
+  };
+
+  // Deletion logic
+  const performDelete = async (payload: { ids?: string[]; ips?: string[]; all?: boolean }) => {
+    setIsDeleting(true);
+    try {
+      const res = await fetch("/api/admin/request-logs", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        showStatus("error", data?.error || "Failed to delete request logs.");
+        return false;
+      }
+
+      const count = data?.deletedCount ?? 0;
+      showStatus("success", `Successfully deleted ${count} log record${count === 1 ? "" : "s"}.`);
+      setSelectedIps(new Set());
+      setSelectedLogIds(new Set());
+
+      startTransition(() => {
+        router.refresh();
+      });
+      return true;
+    } catch {
+      showStatus("error", "A network error occurred while deleting request logs.");
+      return false;
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (viewMode === "grouped") {
+      const ips = Array.from(selectedIps);
+      if (ips.length === 0) return;
+      if (!window.confirm(`Are you sure you want to delete all logs for ${ips.length} selected IP address${ips.length === 1 ? "" : "es"}? This cannot be undone.`)) {
+        return;
+      }
+      await performDelete({ ips });
+    } else {
+      const ids = Array.from(selectedLogIds);
+      if (ids.length === 0) return;
+      if (!window.confirm(`Are you sure you want to delete ${ids.length} selected request log record${ids.length === 1 ? "" : "s"}? This cannot be undone.`)) {
+        return;
+      }
+      await performDelete({ ids });
+    }
+  };
+
+  const handleDeleteSingleIp = async (ip: string) => {
+    if (!window.confirm(`Are you sure you want to delete all request logs for IP ${ip}?`)) {
+      return;
+    }
+    await performDelete({ ips: [ip] });
+  };
+
+  const handleDeleteSingleLog = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this log record?")) {
+      return;
+    }
+    await performDelete({ ids: [id] });
+  };
+
+  const handleClearAll = async () => {
+    if (!window.confirm("⚠️ DANGER: Are you sure you want to permanently clear ALL visitor and request logs? This action is irreversible.")) {
+      return;
+    }
+    await performDelete({ all: true });
+  };
+
   const formatDate = (iso: string) => {
     return new Date(iso).toISOString().replace("T", " ").replace("Z", "");
   };
 
-  const formatTimeOnly = (iso: string) => {
-    const d = new Date(iso);
-    return d.toISOString().slice(11, 19);
-  };
-
   return (
     <div className="space-y-8">
-      {/* Page Title */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+      {/* Page Title & Global Actions */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="font-mono text-xs uppercase tracking-wider text-[#6c9cff]">
             Monitoring &amp; Telemetry
@@ -149,7 +298,40 @@ export function RequestLogsViewer({
             Real-time IP tracking, visitor session journeys, and inbound request history.
           </p>
         </div>
+
+        {total > 0 && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleClearAll}
+              disabled={isDeleting || isPending}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2 text-xs font-mono font-semibold text-red-400 hover:bg-red-500/20 hover:border-red-500/50 transition-colors disabled:opacity-50"
+              title="Permanently remove all recorded request logs"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              <span>Clear All Logs</span>
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Status Notification Banner */}
+      {statusMessage && (
+        <div
+          className={`flex items-center gap-2.5 rounded-xl p-4 text-xs font-mono border ${
+            statusMessage.type === "success"
+              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+              : "bg-red-500/10 border-red-500/20 text-red-400"
+          }`}
+        >
+          {statusMessage.type === "success" ? (
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+          ) : (
+            <AlertCircle className="h-4 w-4 shrink-0" />
+          )}
+          <span>{statusMessage.text}</span>
+        </div>
+      )}
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -307,6 +489,37 @@ export function RequestLogsViewer({
       {viewMode === "grouped" ? (
         /* GROUPED BY IP VIEW */
         <div className="space-y-4">
+          {/* Grouped Select-All Toolbar */}
+          {initialGroupedLogs.length > 0 && (
+            <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0f1013] px-5 py-3 text-xs font-mono text-[#a1a1aa]">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={allCurrentIpsSelected}
+                  onChange={toggleSelectAllIps}
+                  className="h-4 w-4 rounded border-white/20 bg-[#090a0d] text-[#5b8cff] focus:ring-[#5b8cff] cursor-pointer accent-[#5b8cff]"
+                />
+                <span className="text-white font-medium">Select all on this page</span>
+                <span className="text-[#64748b]">({initialGroupedLogs.length} visitor IPs)</span>
+              </label>
+
+              {selectedIps.size > 0 && (
+                <div className="flex items-center gap-3">
+                  <span className="text-[#6c9cff] font-medium">
+                    {selectedIps.size} selected
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIps(new Set())}
+                    className="text-[#71717a] hover:text-white transition-colors"
+                  >
+                    Clear selection
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {initialGroupedLogs.length === 0 ? (
             <div className="rounded-2xl border border-white/10 bg-[#121316] p-12 text-center text-[#71717a]">
               No visitor sessions found matching the filter criteria.
@@ -314,19 +527,31 @@ export function RequestLogsViewer({
           ) : (
             initialGroupedLogs.map((group) => {
               const isExpanded = expandedIps.has(group.ip);
+              const isSelected = selectedIps.has(group.ip);
 
               return (
                 <div
                   key={group.ip}
-                  className="rounded-2xl border border-white/10 bg-[#121316] overflow-hidden transition-all duration-200 hover:border-white/20"
+                  className={`rounded-2xl border bg-[#121316] overflow-hidden transition-all duration-200 ${
+                    isSelected ? "border-[#5b8cff]/50 bg-[#12141c]" : "border-white/10 hover:border-white/20"
+                  }`}
                 >
                   {/* IP Card Header */}
                   <div
                     onClick={() => toggleIpExpand(group.ip)}
                     className="cursor-pointer p-5 sm:p-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-[#14151a]"
                   >
-                    {/* Left: IP & Location */}
+                    {/* Left: Checkbox, IP & Location */}
                     <div className="flex flex-wrap items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={() => toggleSelectIp(group.ip)}
+                        aria-label={`Select IP ${group.ip}`}
+                        className="h-4 w-4 rounded border-white/20 bg-[#090a0d] text-[#5b8cff] focus:ring-[#5b8cff] cursor-pointer accent-[#5b8cff] mr-1"
+                      />
+
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-base font-bold text-white">
                           {group.ip}
@@ -367,8 +592,8 @@ export function RequestLogsViewer({
                     </div>
 
                     {/* Right: Timestamp & Actions */}
-                    <div className="flex items-center gap-4 text-xs font-mono text-[#a1a1aa]">
-                      <div className="text-right">
+                    <div className="flex items-center gap-3 text-xs font-mono text-[#a1a1aa]">
+                      <div className="text-right mr-2">
                         <div>
                           Last active:{" "}
                           <span className="text-white font-medium">
@@ -396,7 +621,21 @@ export function RequestLogsViewer({
                         <span>Filter IP</span>
                       </button>
 
-                      <div className="text-[#71717a]">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteSingleIp(group.ip);
+                        }}
+                        disabled={isDeleting}
+                        className="inline-flex items-center gap-1 rounded-md border border-red-500/20 bg-red-500/5 px-2.5 py-1 text-xs text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors disabled:opacity-50"
+                        title="Delete all logs for this IP"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        <span>Delete</span>
+                      </button>
+
+                      <div className="text-[#71717a] pl-1">
                         {isExpanded ? (
                           <ChevronUp className="h-4 w-4" />
                         ) : (
@@ -479,30 +718,55 @@ export function RequestLogsViewer({
             <table className="w-full text-left text-sm">
               <thead className="border-b border-white/10 bg-[#0d0e11] font-mono text-xs uppercase text-[#71717a]">
                 <tr>
+                  <th className="w-12 px-4 py-3.5 text-center">
+                    <input
+                      type="checkbox"
+                      checked={allCurrentLogsSelected}
+                      onChange={toggleSelectAllLogs}
+                      aria-label="Select all request logs on this page"
+                      className="h-4 w-4 rounded border-white/20 bg-[#090a0d] text-[#5b8cff] focus:ring-[#5b8cff] cursor-pointer accent-[#5b8cff]"
+                    />
+                  </th>
                   <th className="px-5 py-3.5">Timestamp (UTC)</th>
                   <th className="px-5 py-3.5">Client IP</th>
                   <th className="px-5 py-3.5">Location</th>
                   <th className="px-5 py-3.5">Method &amp; Path</th>
                   <th className="px-5 py-3.5">User Agent</th>
+                  <th className="w-16 px-4 py-3.5 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {initialLogs.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-5 py-12 text-center text-[#71717a]">
+                    <td colSpan={7} className="px-5 py-12 text-center text-[#71717a]">
                       No request logs found matching the filter criteria.
                     </td>
                   </tr>
                 ) : (
                   initialLogs.map((log) => {
                     const isExpanded = expandedLogId === log.id;
+                    const isSelected = selectedLogIds.has(log.id);
 
                     return (
                       <React.Fragment key={log.id}>
                         <tr
                           onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
-                          className="cursor-pointer hover:bg-white/[0.02] transition-colors"
+                          className={`cursor-pointer transition-colors ${
+                            isSelected ? "bg-[#5b8cff]/5 hover:bg-[#5b8cff]/10" : "hover:bg-white/[0.02]"
+                          }`}
                         >
+                          <td
+                            className="w-12 px-4 py-3.5 text-center"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleSelectLog(log.id)}
+                              aria-label={`Select log ${log.id}`}
+                              className="h-4 w-4 rounded border-white/20 bg-[#090a0d] text-[#5b8cff] focus:ring-[#5b8cff] cursor-pointer accent-[#5b8cff]"
+                            />
+                          </td>
                           <td className="px-5 py-3.5 font-mono text-xs text-[#a1a1aa] whitespace-nowrap">
                             {formatDate(log.created_at)}
                           </td>
@@ -562,11 +826,25 @@ export function RequestLogsViewer({
                           <td className="px-5 py-3.5 text-xs text-[#71717a] max-w-[240px] truncate font-mono">
                             {log.user_agent || "—"}
                           </td>
+                          <td
+                            className="w-16 px-4 py-3.5 text-right"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSingleLog(log.id)}
+                              disabled={isDeleting}
+                              className="inline-flex items-center justify-center rounded p-1 text-[#71717a] hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50 transition-colors"
+                              title="Delete this log record"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </td>
                         </tr>
 
                         {isExpanded && (
                           <tr className="bg-[#0b0c0f]">
-                            <td colSpan={5} className="px-6 py-4 text-xs font-mono space-y-2 border-y border-white/5">
+                            <td colSpan={7} className="px-6 py-4 text-xs font-mono space-y-2 border-y border-white/5">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[#cbd5e1]">
                                 <div>
                                   <span className="text-[#64748b] block mb-1 uppercase text-[10px]">Full User-Agent</span>
@@ -591,6 +869,55 @@ export function RequestLogsViewer({
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Floating / Sticky Bulk Action Bar */}
+      {((viewMode === "grouped" && selectedIps.size > 0) ||
+        (viewMode === "stream" && selectedLogIds.size > 0)) && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 rounded-2xl border border-white/20 bg-[#14161f]/95 px-6 py-3.5 shadow-2xl backdrop-blur-lg animate-in fade-in slide-in-from-bottom-4 duration-200">
+          <div className="flex items-center gap-2 font-mono text-xs text-white whitespace-nowrap">
+            <span className="flex h-2 w-2 rounded-full bg-[#5b8cff] animate-pulse" />
+            <span>
+              {viewMode === "grouped"
+                ? `${selectedIps.size} IP${selectedIps.size === 1 ? "" : "s"} selected`
+                : `${selectedLogIds.size} record${selectedLogIds.size === 1 ? "" : "s"} selected`}
+            </span>
+          </div>
+
+          <div className="h-4 w-[1px] bg-white/10" />
+
+          <button
+            type="button"
+            onClick={() =>
+              viewMode === "grouped"
+                ? setSelectedIps(new Set())
+                : setSelectedLogIds(new Set())
+            }
+            disabled={isDeleting}
+            className="font-mono text-xs text-[#a1a1aa] hover:text-white transition-colors whitespace-nowrap"
+          >
+            Deselect
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDeleteSelected}
+            disabled={isDeleting}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-mono font-bold text-white hover:bg-red-500 disabled:opacity-50 transition-colors shadow-lg shadow-red-950/50 whitespace-nowrap"
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <span>Deleting…</span>
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Delete Selected</span>
+              </>
+            )}
+          </button>
         </div>
       )}
 

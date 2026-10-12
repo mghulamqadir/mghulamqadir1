@@ -9,6 +9,17 @@ export const httpUrlSchema = z.url().max(500).refine((value) => /^https?:\/\//.t
 export const optionalHttpUrl = z.union([z.literal(""), httpUrlSchema]).optional();
 export const contactMessageStatusSchema = z.object({ status: z.enum(["unread", "read", "archived"]) }).strict();
 
+export const deleteRequestLogsSchema = z
+  .object({
+    ids: z.array(z.string()).optional(),
+    ips: z.array(z.string()).optional(),
+    all: z.boolean().optional(),
+  })
+  .refine(
+    (data) => Boolean(data.all || (data.ids && data.ids.length > 0) || (data.ips && data.ips.length > 0)),
+    { message: "Must specify ids, ips, or all to delete logs" }
+  );
+
 export const siteSettingsSchema = z.object({
   profile: z.object({
     full_name: optionalText(160), headline: optionalText(180), short_bio: optionalText(500),

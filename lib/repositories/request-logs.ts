@@ -228,3 +228,45 @@ export async function getRequestLogStats(): Promise<RequestLogStats> {
     };
   }
 }
+
+export async function deleteRequestLogsByIds(ids: string[]): Promise<number> {
+  if (!hasMongo() || !ids.length) return 0;
+  try {
+    const col = await collection<RecordWithId>("request_logs");
+    const result = await col.deleteMany({ id: { $in: ids } });
+    return result.deletedCount ?? 0;
+  } catch (error) {
+    console.error("Failed to delete request logs by IDs:", {
+      message: error instanceof Error ? error.message : "unknown",
+    });
+    return 0;
+  }
+}
+
+export async function deleteRequestLogsByIps(ips: string[]): Promise<number> {
+  if (!hasMongo() || !ips.length) return 0;
+  try {
+    const col = await collection<RecordWithId>("request_logs");
+    const result = await col.deleteMany({ ip: { $in: ips } });
+    return result.deletedCount ?? 0;
+  } catch (error) {
+    console.error("Failed to delete request logs by IPs:", {
+      message: error instanceof Error ? error.message : "unknown",
+    });
+    return 0;
+  }
+}
+
+export async function clearAllRequestLogs(): Promise<number> {
+  if (!hasMongo()) return 0;
+  try {
+    const col = await collection<RecordWithId>("request_logs");
+    const result = await col.deleteMany({});
+    return result.deletedCount ?? 0;
+  } catch (error) {
+    console.error("Failed to clear all request logs:", {
+      message: error instanceof Error ? error.message : "unknown",
+    });
+    return 0;
+  }
+}
