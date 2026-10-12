@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useTransition, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
@@ -22,7 +22,9 @@ import {
   Trash2,
   Loader2,
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
+  X,
 } from "lucide-react";
 import type { IpGroupedLog, RequestLog, RequestLogStats } from "@/lib/types";
 
@@ -37,6 +39,14 @@ interface RequestLogsViewerProps {
   searchIp?: string;
   searchPath?: string;
 }
+
+type DeleteModalState =
+  | { type: "single-ip"; ip: string }
+  | { type: "single-log"; id: string }
+  | { type: "selected-ips"; count: number; ips: string[] }
+  | { type: "selected-logs"; count: number; ids: string[] }
+  | { type: "clear-all" }
+  | null;
 
 export function RequestLogsViewer({
   viewMode,
@@ -66,12 +76,24 @@ export function RequestLogsViewer({
   const [selectedIps, setSelectedIps] = useState<Set<string>>(new Set());
   const [selectedLogIds, setSelectedLogIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<DeleteModalState>(null);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  // Dismiss delete popup on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && deleteModal && !isDeleting) {
+        setDeleteModal(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [deleteModal, isDeleting]);
 
   const showStatus = (type: "success" | "error", text: string) => {
     setStatusMessage({ type, text });
@@ -208,7 +230,7 @@ export function RequestLogsViewer({
     }
   };
 
-  // Deletion logic
+  // Deletion logic execution
   const performDelete = async (payload: { ids?: string[]; ips?: string[]; all?: boolean }) => {
     setIsDeleting(true);
     try {
@@ -242,43 +264,24 @@ export function RequestLogsViewer({
     }
   };
 
-  const handleDeleteSelected = async () => {
-    if (viewMode === "grouped") {
-      const ips = Array.from(selectedIps);
-      if (ips.length === 0) return;
-      if (!window.confirm(`Are you sure you want to delete all logs for ${ips.length} selected IP address${ips.length === 1 ? "" : "es"}? This cannot be undone.`)) {
-        return;
-      }
-      await performDelete({ ips });
-    } else {
-      const ids = Array.from(selectedLogIds);
-      if (ids.length === 0) return;
-      if (!window.confirm(`Are you sure you want to delete ${ids.length} selected request log record${ids.length === 1 ? "" : "s"}? This cannot be undone.`)) {
-        return;
-      }
-      await performDelete({ ids });
+  const handleConfirmModalDelete = async () => {
+    if (!deleteModal) return;
+    let success = false;
+    if (deleteModal.type === "single-ip") {
+      success = await performDelete({ ips: [deleteModal.ip] });
+    } else if (deleteModal.type === "single-log") {
+      success = await performDelete({ ids: [deleteModal.id] });
+    } else if (deleteModal.type === "selected-ips") {
+      success = await performDelete({ ips: deleteModal.ips });
+    } else if (deleteModal.type === "selected-logs") {
+      success = await performDelete({ ids: deleteModal.ids });
+    } else if (deleteModal.type === "clear-all") {
+      success = await performDelete({ all: true });
     }
-  };
 
-  const handleDeleteSingleIp = async (ip: string) => {
-    if (!window.confirm(`Are you sure you want to delete all request logs for IP ${ip}?`)) {
-      return;
+    if (success) {
+      setDeleteModal(null);
     }
-    await performDelete({ ips: [ip] });
-  };
-
-  const handleDeleteSingleLog = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this log record?")) {
-      return;
-    }
-    await performDelete({ ids: [id] });
-  };
-
-  const handleClearAll = async () => {
-    if (!window.confirm("⚠️ DANGER: Are you sure you want to permanently clear ALL visitor and request logs? This action is irreversible.")) {
-      return;
-    }
-    await performDelete({ all: true });
   };
 
   const formatDate = (iso: string) => {
@@ -303,7 +306,7 @@ export function RequestLogsViewer({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleClearAll}
+              onClick={() => setDeleteModal({ type: "clear-all" })}
               disabled={isDeleting || isPending}
               className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2 text-xs font-mono font-semibold text-red-400 hover:bg-red-500/20 hover:border-red-500/50 transition-colors disabled:opacity-50"
               title="Permanently remove all recorded request logs"
@@ -625,7 +628,7 @@ export function RequestLogsViewer({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteSingleIp(group.ip);
+                          setDeleteModal({ type: "single-ip", ip: group.ip });
                         }}
                         disabled={isDeleting}
                         className="inline-flex items-center gap-1 rounded-md border border-red-500/20 bg-red-500/5 px-2.5 py-1 text-xs text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors disabled:opacity-50"
@@ -832,7 +835,7 @@ export function RequestLogsViewer({
                           >
                             <button
                               type="button"
-                              onClick={() => handleDeleteSingleLog(log.id)}
+                              onClick={() => setDeleteModal({ type: "single-log", id: log.id })}
                               disabled={isDeleting}
                               className="inline-flex items-center justify-center rounded p-1 text-[#71717a] hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50 transition-colors"
                               title="Delete this log record"
@@ -875,7 +878,7 @@ export function RequestLogsViewer({
       {/* Floating / Sticky Bulk Action Bar */}
       {((viewMode === "grouped" && selectedIps.size > 0) ||
         (viewMode === "stream" && selectedLogIds.size > 0)) && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 rounded-2xl border border-white/20 bg-[#14161f]/95 px-6 py-3.5 shadow-2xl backdrop-blur-lg animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 rounded-2xl border border-white/20 bg-[#14161f]/95 px-6 py-3.5 shadow-2xl backdrop-blur-lg animate-in fade-in slide-in-from-bottom-4 duration-200">
           <div className="flex items-center gap-2 font-mono text-xs text-white whitespace-nowrap">
             <span className="flex h-2 w-2 rounded-full bg-[#5b8cff] animate-pulse" />
             <span>
@@ -902,7 +905,17 @@ export function RequestLogsViewer({
 
           <button
             type="button"
-            onClick={handleDeleteSelected}
+            onClick={() => {
+              if (viewMode === "grouped") {
+                const ips = Array.from(selectedIps);
+                if (ips.length === 0) return;
+                setDeleteModal({ type: "selected-ips", count: ips.length, ips });
+              } else {
+                const ids = Array.from(selectedLogIds);
+                if (ids.length === 0) return;
+                setDeleteModal({ type: "selected-logs", count: ids.length, ids });
+              }
+            }}
             disabled={isDeleting}
             className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-mono font-bold text-white hover:bg-red-500 disabled:opacity-50 transition-colors shadow-lg shadow-red-950/50 whitespace-nowrap"
           >
@@ -960,6 +973,129 @@ export function RequestLogsViewer({
           </button>
         </div>
       </div>
+
+      {/* Custom Delete Confirmation Modal (Pop-up instead of browser alert) */}
+      {deleteModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+        >
+          {/* Backdrop */}
+          <div
+            onClick={() => !isDeleting && setDeleteModal(null)}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-150"
+          />
+
+          {/* Modal Content */}
+          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/15 bg-[#14161f] p-6 sm:p-7 shadow-2xl transition-all animate-in zoom-in-95 fade-in duration-150 z-10">
+            {/* Close button */}
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={() => setDeleteModal(null)}
+              className="absolute top-5 right-5 rounded-lg p-1.5 text-[#71717a] hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-start gap-4">
+              {/* Warning Icon Badge */}
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-400">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+
+              <div className="flex-1 pr-6">
+                <h3 className="text-lg font-bold text-white">
+                  {deleteModal.type === "clear-all"
+                    ? "Clear All Visitor & Request Logs"
+                    : deleteModal.type === "selected-ips"
+                    ? `Delete ${deleteModal.count} Selected IP Sessions`
+                    : deleteModal.type === "selected-logs"
+                    ? `Delete ${deleteModal.count} Selected Log Records`
+                    : deleteModal.type === "single-ip"
+                    ? "Delete IP Visitor Logs"
+                    : "Delete Request Log Record"}
+                </h3>
+
+                <div className="mt-2 text-sm text-[#94a3b8] leading-relaxed">
+                  {deleteModal.type === "clear-all" && (
+                    <p>
+                      Are you sure you want to permanently purge{" "}
+                      <span className="font-semibold text-white">ALL visitor and request logs</span> from the database? This action is irreversible and all historical telemetry will be wiped.
+                    </p>
+                  )}
+
+                  {deleteModal.type === "selected-ips" && (
+                    <p>
+                      Are you sure you want to delete all logs for the{" "}
+                      <span className="font-semibold text-white">{deleteModal.count} selected IP address(es)</span>? All journey history and visited paths under these IPs will be permanently deleted.
+                    </p>
+                  )}
+
+                  {deleteModal.type === "selected-logs" && (
+                    <p>
+                      Are you sure you want to delete the{" "}
+                      <span className="font-semibold text-white">{deleteModal.count} selected request log record(s)</span>? This action cannot be undone.
+                    </p>
+                  )}
+
+                  {deleteModal.type === "single-ip" && (
+                    <p>
+                      Are you sure you want to delete all request logs for IP{" "}
+                      <span className="font-mono font-semibold text-white bg-white/5 px-1.5 py-0.5 rounded border border-white/10">
+                        {deleteModal.ip}
+                      </span>
+                      ? All visited paths recorded for this visitor will be permanently removed.
+                    </p>
+                  )}
+
+                  {deleteModal.type === "single-log" && (
+                    <p>
+                      Are you sure you want to permanently delete this log entry? This action cannot be undone.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="mt-7 flex items-center justify-end gap-3 border-t border-white/10 pt-4">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setDeleteModal(null)}
+                className="rounded-xl border border-white/10 bg-transparent px-4 py-2.5 text-xs font-mono text-[#a1a1aa] hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleConfirmModalDelete}
+                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-xs font-mono font-bold text-white hover:bg-red-500 transition-colors shadow-lg shadow-red-950/40 disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Deleting…</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    <span>
+                      {deleteModal.type === "clear-all"
+                        ? "Yes, Clear All Logs"
+                        : "Confirm Delete"}
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
