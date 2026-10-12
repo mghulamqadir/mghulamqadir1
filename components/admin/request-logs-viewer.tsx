@@ -69,6 +69,30 @@ export function RequestLogsViewer({
   const [totalCount, setTotalCount] = useState<number>(total);
   const [currentStats, setCurrentStats] = useState<RequestLogStats>(stats);
 
+  // User local timezone detection state
+  const [timeZone, setTimeZone] = useState<string>("UTC");
+  const [timeZoneLabel, setTimeZoneLabel] = useState<string>("UTC");
+  const [useLocalTime, setUseLocalTime] = useState<boolean>(true);
+  const [mounted, setMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setMounted(true);
+    try {
+      const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (userTz) {
+        setTimeZone(userTz);
+        const parts = new Intl.DateTimeFormat("en-US", {
+          timeZone: userTz,
+          timeZoneName: "short",
+        }).formatToParts(new Date());
+        const abbr = parts.find((p) => p.type === "timeZoneName")?.value;
+        setTimeZoneLabel(abbr || userTz);
+      }
+    } catch {
+      // Keep fallback to UTC if Intl API is unsupported
+    }
+  }, []);
+
   // Synchronize when server component props change
   useEffect(() => {
     setGroupedLogs(initialGroupedLogs);
@@ -341,9 +365,37 @@ export function RequestLogsViewer({
     }
   };
 
+  // Convert and format timestamp in user's detected local timezone
   const formatDate = (iso: string) => {
-    return new Date(iso).toISOString().replace("T", " ").replace("Z", "");
+    if (!iso) return "—";
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+
+      const activeTz = useLocalTime && mounted ? timeZone : "UTC";
+
+      const datePart = new Intl.DateTimeFormat("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: activeTz,
+      }).format(d);
+
+      const timePart = new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+        timeZone: activeTz,
+      }).format(d);
+
+      return `${datePart} ${timePart}`;
+    } catch {
+      return iso;
+    }
   };
+
+  const currentTimeZoneName = mounted ? (useLocalTime ? timeZoneLabel : "UTC") : "Local";
 
   return (
     <div className="space-y-8">
@@ -359,8 +411,27 @@ export function RequestLogsViewer({
           </p>
         </div>
 
-        {totalCount > 0 && (
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* User Timezone Badge & Quick Switcher */}
+          <div className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#14151e] px-3 py-2 text-xs font-mono text-[#cbd5e1]">
+            <Clock className="h-3.5 w-3.5 text-[#5b8cff]" />
+            <span className="text-[#71717a]">Timezone:</span>
+            <span className="font-semibold text-white">
+              {mounted ? (useLocalTime ? `${timeZone} (${timeZoneLabel})` : "UTC") : "User Local"}
+            </span>
+            {mounted && (
+              <button
+                type="button"
+                onClick={() => setUseLocalTime((prev) => !prev)}
+                className="ml-1 text-[11px] underline text-[#6c9cff] hover:text-white transition-colors"
+                title="Toggle between user local timezone and UTC"
+              >
+                {useLocalTime ? "Switch to UTC" : "Switch to Local"}
+              </button>
+            )}
+          </div>
+
+          {totalCount > 0 && (
             <button
               type="button"
               onClick={() => setDeleteModal({ type: "clear-all" })}
@@ -371,8 +442,8 @@ export function RequestLogsViewer({
               <Trash2 className="h-3.5 w-3.5" />
               <span>Clear All Logs</span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Status Notification Banner */}
@@ -656,13 +727,19 @@ export function RequestLogsViewer({
                       <div className="text-right mr-2">
                         <div>
                           Last active:{" "}
-                          <span className="text-white font-medium">
+                          <span className="text-white font-medium" suppressHydrationWarning>
                             {formatDate(group.last_seen)}
+                          </span>{" "}
+                          <span className="text-[#64748b] text-[11px]" suppressHydrationWarning>
+                            {currentTimeZoneName}
                           </span>
                         </div>
                         {group.first_seen !== group.last_seen && (
                           <div className="text-[#71717a] text-[11px] mt-0.5">
-                            First seen: {formatDate(group.first_seen)}
+                            First seen:{" "}
+                            <span suppressHydrationWarning>
+                              {formatDate(group.first_seen)}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -746,12 +823,14 @@ export function RequestLogsViewer({
                               )}
                             </div>
 
-                            {/* Exact Timestamp */}
-                            <div className="text-right text-[#a1a1aa] text-xs shrink-0 flex items-center gap-3 sm:justify-end">
-                              <span className="text-white font-medium">
+                            {/* Exact Timestamp in User Timezone */}
+                            <div className="text-right text-[#a1a1aa] text-xs shrink-0 flex items-center gap-2 sm:justify-end">
+                              <span className="text-white font-medium" suppressHydrationWarning>
                                 {formatDate(visit.created_at)}
                               </span>
-                              <span className="text-[#64748b] text-[11px]">UTC</span>
+                              <span className="text-[#64748b] text-[11px]" suppressHydrationWarning>
+                                {currentTimeZoneName}
+                              </span>
                             </div>
                           </div>
                         ))}
@@ -787,7 +866,9 @@ export function RequestLogsViewer({
                       className="h-4 w-4 rounded border-white/20 bg-[#090a0d] text-[#5b8cff] focus:ring-[#5b8cff] cursor-pointer accent-[#5b8cff]"
                     />
                   </th>
-                  <th className="px-5 py-3.5">Timestamp (UTC)</th>
+                  <th className="px-5 py-3.5">
+                    Timestamp ({currentTimeZoneName})
+                  </th>
                   <th className="px-5 py-3.5">Client IP</th>
                   <th className="px-5 py-3.5">Location</th>
                   <th className="px-5 py-3.5">Method &amp; Path</th>
@@ -827,7 +908,7 @@ export function RequestLogsViewer({
                               className="h-4 w-4 rounded border-white/20 bg-[#090a0d] text-[#5b8cff] focus:ring-[#5b8cff] cursor-pointer accent-[#5b8cff]"
                             />
                           </td>
-                          <td className="px-5 py-3.5 font-mono text-xs text-[#a1a1aa] whitespace-nowrap">
+                          <td className="px-5 py-3.5 font-mono text-xs text-[#a1a1aa] whitespace-nowrap" suppressHydrationWarning>
                             {formatDate(log.created_at)}
                           </td>
                           <td className="px-5 py-3.5 font-mono text-xs text-white whitespace-nowrap">
