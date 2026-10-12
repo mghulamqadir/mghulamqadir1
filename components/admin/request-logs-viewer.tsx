@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition, useEffect } from "react";
+import React, { useState, useTransition, useEffect, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
@@ -48,6 +48,30 @@ type DeleteModalState =
   | { type: "clear-all" }
   | null;
 
+const emptySubscribe = () => () => {};
+
+function useMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+}
+
+function useDetectedTimeZone() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => {
+      try {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+      } catch {
+        return "UTC";
+      }
+    },
+    () => "UTC"
+  );
+}
+
 export function RequestLogsViewer({
   viewMode,
   initialLogs,
@@ -63,52 +87,53 @@ export function RequestLogsViewer({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  // Local state for immediate / optimistic UI updates without requiring page reload
-  const [groupedLogs, setGroupedLogs] = useState<IpGroupedLog[]>(initialGroupedLogs);
-  const [logs, setLogs] = useState<RequestLog[]>(initialLogs);
-  const [totalCount, setTotalCount] = useState<number>(total);
-  const [currentStats, setCurrentStats] = useState<RequestLogStats>(stats);
+  const mounted = useMounted();
+  const detectedTimeZone = useDetectedTimeZone();
+  const [manualOverrideTimeZone, setManualOverrideTimeZone] = useState<string | null>(null);
 
-  // User local timezone detection state
-  const [timeZone, setTimeZone] = useState<string>("UTC");
-  const [timeZoneLabel, setTimeZoneLabel] = useState<string>("UTC");
-  const [useLocalTime, setUseLocalTime] = useState<boolean>(true);
-  const [mounted, setMounted] = useState<boolean>(false);
+  const useLocalTime = manualOverrideTimeZone === null ? true : manualOverrideTimeZone !== "UTC";
+  const timeZone = useLocalTime ? detectedTimeZone : "UTC";
 
-  useEffect(() => {
-    setMounted(true);
-    try {
-      const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (userTz) {
-        setTimeZone(userTz);
-        const parts = new Intl.DateTimeFormat("en-US", {
-          timeZone: userTz,
-          timeZoneName: "short",
-        }).formatToParts(new Date());
-        const abbr = parts.find((p) => p.type === "timeZoneName")?.value;
-        setTimeZoneLabel(abbr || userTz);
+  const timeZoneLabel = mounted
+    ? (() => {
+        try {
+          const parts = new Intl.DateTimeFormat("en-US", {
+            timeZone,
+            timeZoneName: "short",
+          }).formatToParts(new Date());
+          return parts.find((p) => p.type === "timeZoneName")?.value || timeZone;
+        } catch {
+          return timeZone;
+        }
+      })()
+    : "UTC";
+
+  // Optimistic deletion tracking derived cleanly without useEffect
+  const [deletedIps, setDeletedIps] = useState<Set<string>>(new Set());
+  const [deletedLogIds, setDeletedLogIds] = useState<Set<string>>(new Set());
+  const [allCleared, setAllCleared] = useState<boolean>(false);
+
+  // Derive visible logs and totals directly from props & local optimistic exclusions
+  const groupedLogs = allCleared
+    ? []
+    : initialGroupedLogs.filter((g) => !deletedIps.has(g.ip));
+
+  const logs = allCleared
+    ? []
+    : initialLogs.filter((l) => !deletedLogIds.has(l.id) && !deletedIps.has(l.ip));
+
+  const totalCount = allCleared
+    ? 0
+    : Math.max(0, total - (viewMode === "grouped" ? deletedIps.size : deletedLogIds.size));
+
+  const currentStats = allCleared
+    ? {
+        totalToday: 0,
+        uniqueIpsToday: 0,
+        totalAllTime: 0,
+        topPaths: [],
       }
-    } catch {
-      // Keep fallback to UTC if Intl API is unsupported
-    }
-  }, []);
-
-  // Synchronize when server component props change
-  useEffect(() => {
-    setGroupedLogs(initialGroupedLogs);
-  }, [initialGroupedLogs]);
-
-  useEffect(() => {
-    setLogs(initialLogs);
-  }, [initialLogs]);
-
-  useEffect(() => {
-    setTotalCount(total);
-  }, [total]);
-
-  useEffect(() => {
-    setCurrentStats(stats);
-  }, [stats]);
+    : stats;
 
   const [ipInput, setIpInput] = useState(searchIp);
   const [pathInput, setPathInput] = useState(searchPath);
@@ -133,8 +158,9 @@ export function RequestLogsViewer({
 
   // Dismiss delete popup on Escape key
   useEffect(() => {
+    if (!deleteModal) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && deleteModal && !isDeleting) {
+      if (e.key === "Escape" && !isDeleting) {
         setDeleteModal(null);
       }
     };
@@ -297,36 +323,15 @@ export function RequestLogsViewer({
       const count = data?.deletedCount ?? 0;
       showStatus("success", `Successfully deleted ${count} log record${count === 1 ? "" : "s"}.`);
 
-      // Immediately filter out deleted records from local state without requiring reload
+      // Optimistically record deletions in local state without requiring reload
       if (payload.all) {
-        setGroupedLogs([]);
-        setLogs([]);
-        setTotalCount(0);
-        setCurrentStats({
-          totalToday: 0,
-          uniqueIpsToday: 0,
-          totalAllTime: 0,
-          topPaths: [],
-        });
+        setAllCleared(true);
       } else if (payload.ips && payload.ips.length > 0) {
-        const ipSet = new Set(payload.ips);
-        setGroupedLogs((prev) => prev.filter((g) => !ipSet.has(g.ip)));
-        setLogs((prev) => prev.filter((l) => !ipSet.has(l.ip)));
-        setTotalCount((prev) =>
-          Math.max(0, prev - (viewMode === "grouped" ? payload.ips!.length : count))
-        );
-        setCurrentStats((prev) => ({
-          ...prev,
-          totalAllTime: Math.max(0, prev.totalAllTime - count),
-        }));
+        const toAdd = payload.ips;
+        setDeletedIps((prev) => new Set([...prev, ...toAdd]));
       } else if (payload.ids && payload.ids.length > 0) {
-        const idSet = new Set(payload.ids);
-        setLogs((prev) => prev.filter((l) => !idSet.has(l.id)));
-        setTotalCount((prev) => Math.max(0, prev - payload.ids!.length));
-        setCurrentStats((prev) => ({
-          ...prev,
-          totalAllTime: Math.max(0, prev.totalAllTime - count),
-        }));
+        const toAdd = payload.ids;
+        setDeletedLogIds((prev) => new Set([...prev, ...toAdd]));
       }
 
       setSelectedIps(new Set());
@@ -422,7 +427,7 @@ export function RequestLogsViewer({
             {mounted && (
               <button
                 type="button"
-                onClick={() => setUseLocalTime((prev) => !prev)}
+                onClick={() => setManualOverrideTimeZone((prev) => (prev === "UTC" ? null : "UTC"))}
                 className="ml-1 text-[11px] underline text-[#6c9cff] hover:text-white transition-colors"
                 title="Toggle between user local timezone and UTC"
               >

@@ -1,6 +1,5 @@
 import "dotenv/config";
 import { MongoClient } from "mongodb";
-import { randomUUID } from "crypto";
 
 const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
 const dbName = process.env.MONGODB_DB_NAME || "portfolio";
