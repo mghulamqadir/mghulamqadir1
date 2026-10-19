@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SeoJsonLd } from "@/components/seo-json-ld";
+import { WhatsAppButton } from "@/components/layout/whatsapp-button";
 import { env } from "@/lib/env";
 
 const geistSans = Geist({
@@ -77,6 +78,7 @@ export default function RootLayout({
         <Header />
         <main id="main-content" className="flex-1 flex flex-col relative">{children}</main>
         <Footer />
+        <WhatsAppButton />
       </body>
     </html>
   );
