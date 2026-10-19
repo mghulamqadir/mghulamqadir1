@@ -8,6 +8,21 @@ export function parseDurationSeconds(value: string): number {
   return amount * multiplier;
 }
 
+type SiteUrlEnvironment = {
+  NEXT_PUBLIC_SITE_URL?: string;
+  VERCEL_PROJECT_PRODUCTION_URL?: string;
+  VERCEL_URL?: string;
+};
+
+export function resolveSiteUrl(source: SiteUrlEnvironment): string | undefined {
+  const configured = source.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configured) return configured;
+
+  const vercelHost = source.VERCEL_PROJECT_PRODUCTION_URL?.trim() || source.VERCEL_URL?.trim();
+  if (!vercelHost) return undefined;
+  return /^https?:\/\//i.test(vercelHost) ? vercelHost : `https://${vercelHost}`;
+}
+
 const envSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.url(),
   MONGODB_URI: z.string().min(1).optional(),
@@ -35,7 +50,14 @@ const envSchema = z.object({
   requireGroup(["BREVO_API_KEY", "BREVO_SENDER_EMAIL", "BREVO_SENDER_NAME", "CONTACT_TO_EMAIL"], Boolean(raw.BREVO_API_KEY || raw.BREVO_SENDER_EMAIL || raw.BREVO_SENDER_NAME || raw.CONTACT_TO_EMAIL));
 });
 
-const parsedEnv = envSchema.parse(process.env);
+const parsedEnv = envSchema.parse({
+  ...process.env,
+  NEXT_PUBLIC_SITE_URL: resolveSiteUrl({
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    VERCEL_URL: process.env.VERCEL_URL,
+  }),
+});
 export const env = parsedEnv;
 
 /** Call only in an authentication runtime path, never from public static rendering. */
