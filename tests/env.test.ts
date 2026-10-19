@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseDurationSeconds, resolveSiteUrl } from "@/lib/env";
+import { DEFAULT_SITE_URL, parseDurationSeconds, resolveSiteUrl } from "@/lib/env";
 
 describe("environment parsing", () => {
   it("parses seconds", () => expect(parseDurationSeconds("30s")).toBe(30));
@@ -21,5 +21,9 @@ describe("environment parsing", () => {
   it("uses the deployment URL for preview builds", () => {
     expect(resolveSiteUrl({ VERCEL_URL: "preview-123.vercel.app" }))
       .toBe("https://preview-123.vercel.app");
+  });
+
+  it("uses the canonical portfolio URL when deployment URLs are unavailable", () => {
+    expect(resolveSiteUrl({})).toBe(DEFAULT_SITE_URL);
   });
 });

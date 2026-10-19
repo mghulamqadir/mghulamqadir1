@@ -5,7 +5,7 @@ import { updateMessage } from "@/lib/repositories/messages";
 export const BREVO_TIMEOUT_MS = 8_000;
 
 export async function deliverContactMessage(id: string, message: Omit<ContactEmail, "receivedAt">): Promise<void> {
-  if (!env.BREVO_API_KEY || !env.BREVO_SENDER_EMAIL) return;
+  if (!env.BREVO_API_KEY || !env.BREVO_SENDER_EMAIL || !env.BREVO_SENDER_NAME || !env.CONTACT_TO_EMAIL) return;
 
   const template = buildContactEmail({ ...message, receivedAt: new Date().toISOString() });
   try {

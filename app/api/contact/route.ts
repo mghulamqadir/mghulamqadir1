@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   }
   let id: string;
   try { id = await insertMessage({ name: parsed.data.name, email: parsed.data.email, subject: parsed.data.subject, message: parsed.data.message }); } catch (error) { console.error("Contact submission persistence failed", { message: error instanceof Error ? error.message : "unknown" }); return NextResponse.json({ error: "Unable to save your message right now." }, { status: 503 }); }
-  if (env.BREVO_API_KEY && env.BREVO_SENDER_EMAIL) {
+  if (env.BREVO_API_KEY && env.BREVO_SENDER_EMAIL && env.BREVO_SENDER_NAME && env.CONTACT_TO_EMAIL) {
     const message = { name: parsed.data.name, email: parsed.data.email, subject: parsed.data.subject, message: parsed.data.message };
     after(() => deliverContactMessage(id, message));
   }

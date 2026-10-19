@@ -14,12 +14,14 @@ type SiteUrlEnvironment = {
   VERCEL_URL?: string;
 };
 
-export function resolveSiteUrl(source: SiteUrlEnvironment): string | undefined {
+export const DEFAULT_SITE_URL = "https://mghulamqadir1.vercel.app";
+
+export function resolveSiteUrl(source: SiteUrlEnvironment): string {
   const configured = source.NEXT_PUBLIC_SITE_URL?.trim();
   if (configured) return configured;
 
   const vercelHost = source.VERCEL_PROJECT_PRODUCTION_URL?.trim() || source.VERCEL_URL?.trim();
-  if (!vercelHost) return undefined;
+  if (!vercelHost) return DEFAULT_SITE_URL;
   return /^https?:\/\//i.test(vercelHost) ? vercelHost : `https://${vercelHost}`;
 }
 
@@ -41,13 +43,6 @@ const envSchema = z.object({
   BREVO_SENDER_EMAIL: z.email().optional(),
   BREVO_SENDER_NAME: z.string().trim().min(1).optional(),
   CONTACT_TO_EMAIL: z.email().optional(),
-}).superRefine((raw, context) => {
-  const requireGroup = (names: Array<keyof typeof raw>, enabled: boolean) => {
-    if (!enabled) return;
-    for (const name of names) if (!raw[name]) context.addIssue({ code: "custom", path: [name], message: `${name} is required when this integration is configured.` });
-  };
-  requireGroup(["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"], Boolean(raw.CLOUDINARY_CLOUD_NAME || raw.CLOUDINARY_API_KEY || raw.CLOUDINARY_API_SECRET));
-  requireGroup(["BREVO_API_KEY", "BREVO_SENDER_EMAIL", "BREVO_SENDER_NAME", "CONTACT_TO_EMAIL"], Boolean(raw.BREVO_API_KEY || raw.BREVO_SENDER_EMAIL || raw.BREVO_SENDER_NAME || raw.CONTACT_TO_EMAIL));
 });
 
 const parsedEnv = envSchema.parse({

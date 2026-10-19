@@ -14,7 +14,14 @@ vi.mock("@/lib/email/deliver-contact-message", () => ({ deliverContactMessage: m
 vi.mock("@/lib/repositories", () => ({ insertMessage: mocks.insert }));
 vi.mock("@/lib/rate-limit", () => ({ isRateLimited: () => false }));
 vi.mock("@/lib/logging/request-tracker", () => ({ getClientIpFromHeaders: () => "203.0.113.10" }));
-vi.mock("@/lib/env", () => ({ env: { BREVO_API_KEY: "key", BREVO_SENDER_EMAIL: "sender@example.com" } }));
+vi.mock("@/lib/env", () => ({
+  env: {
+    BREVO_API_KEY: "key",
+    BREVO_SENDER_EMAIL: "sender@example.com",
+    BREVO_SENDER_NAME: "Portfolio",
+    CONTACT_TO_EMAIL: "owner@example.com",
+  },
+}));
 
 import { POST } from "@/app/api/contact/route";
 
