@@ -34,11 +34,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Ghulam Qadir — Backend-Focused Full Stack Engineer",
+    default: "Ghulam Qadir — Full Stack Engineer",
     template: "%s | Ghulam Qadir",
   },
   description:
-    "Backend-Focused Full Stack Engineer building production systems, AI/RAG pipelines, and scalable web platforms. Node.js, AI, PostgreSQL, Next.js.",
+    "Full Stack Engineer building production systems, AI/RAG pipelines, and scalable web platforms. Node.js, AI, PostgreSQL, Next.js.",
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL as string),
   keywords: [
     "Backend Engineer",
@@ -52,8 +52,8 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Ghulam Qadir" }],
   creator: "Ghulam Qadir",
-  openGraph: { type: "website", title: "Ghulam Qadir — Backend-Focused Full Stack Engineer", description: "Backend systems, AI/RAG pipelines, and production SaaS applications.", siteName: "Ghulam Qadir" },
-  twitter: { card: "summary_large_image", title: "Ghulam Qadir — Backend-Focused Full Stack Engineer", description: "Backend systems, AI/RAG pipelines, and production SaaS applications." },
+  openGraph: { type: "website", title: "Ghulam Qadir — Full Stack Engineer", description: "Full stack systems, AI/RAG pipelines, and production SaaS applications.", siteName: "Ghulam Qadir" },
+  twitter: { card: "summary_large_image", title: "Ghulam Qadir — Full Stack Engineer", description: "Full stack systems, AI/RAG pipelines, and production SaaS applications." },
 };
 
 export default function RootLayout({

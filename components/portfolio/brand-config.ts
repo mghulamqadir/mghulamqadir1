@@ -4,13 +4,12 @@
  */
 export const BRAND_CONFIG = {
   name: "Ghulam Qadir",
-  role: "Backend-Focused Full Stack Engineer",
+  role: "Full Stack Engineer",
   location: "Lahore, Pakistan",
   timezone: "UTC+5",
-  headline: "Backend-Focused Full Stack Engineer",
-  headlineWord1: "Backend-Focused",
-  headlineWord2: "Full Stack",
-  headlineWord3: "Engineer",
+  headline: "Full Stack Engineer",
+  headlineWord1: "Full Stack",
+  headlineWord2: "Engineer",
   portrait: {
     src: "/images/portrait.webp",
     fallbackSrc: "/images/portrait.jpg",

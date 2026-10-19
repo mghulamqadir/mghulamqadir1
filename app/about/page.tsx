@@ -14,7 +14,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Learn more about Ghulam Qadir, Backend-Focused Full Stack Engineer building production AI/RAG systems and resilient web platforms.",
+    "Learn more about Ghulam Qadir, Full Stack Engineer building production AI/RAG systems and resilient web platforms.",
   alternates: { canonical: "/about" },
 };
 
@@ -42,7 +42,7 @@ export default async function AboutPage() {
               Building reliable systems behind modern digital products.
             </h1>
             <p className="text-body-lg text-text-muted leading-relaxed">
-              I am a Backend-Focused Full Stack Engineer based in Lahore, Pakistan. Over the past several
+              I am a Full Stack Engineer based in Lahore, Pakistan. Over the past several
               years, I have designed and deployed high-throughput APIs, sequential AI/RAG pipelines,
               payment architectures via Stripe Connect, and scalable web platforms.
             </p>

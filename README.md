@@ -1,6 +1,6 @@
 # Ghulam Qadir — Portfolio & CMS
 
-A production-oriented portfolio and private content-management system for **Ghulam Qadir**, a backend-focused full stack engineer working with Node.js, AI/RAG, React, APIs, payments, and SaaS platforms.
+A production-oriented portfolio and private content-management system for **Ghulam Qadir**, a full stack engineer working with Node.js, AI/RAG, React, APIs, payments, and SaaS platforms.
 
 ## Stack
 

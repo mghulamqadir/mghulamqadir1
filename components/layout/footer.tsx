@@ -18,7 +18,7 @@ export function Footer() {
               <span className="text-xs font-mono text-text-muted">Lahore, PK</span>
             </div>
             <p className="text-sm text-text-muted leading-relaxed">
-              Backend-Focused Full Stack Engineer specializing in Node.js, AI/RAG architectures, and production distributed systems.
+              Full Stack Engineer specializing in Node.js, AI/RAG architectures, and production distributed systems.
             </p>
           </div>
 
