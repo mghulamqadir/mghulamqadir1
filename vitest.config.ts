@@ -5,5 +5,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    // Unit tests must not depend on a developer's uncommitted .env file.
+    env: { NEXT_PUBLIC_SITE_URL: "https://portfolio.test" },
   },
 });
