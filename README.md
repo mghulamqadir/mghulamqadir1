@@ -65,6 +65,7 @@ Use [`.env.example`](.env.example) as the canonical variable-name reference. Sec
 - `BREVO_API_KEY`
 
 Run `npm run env:check` before builds and deployments. It validates canonical names without printing values. If upgrading from legacy names, run `npm run env:normalize` once.
+Runtime compatibility is retained for deployed `NEXTAUTH_SECRET`/`JWT_SECRET` and `MONGO_URI` values, but new configuration should use the canonical names above.
 
 ## Content and media responsibilities
 

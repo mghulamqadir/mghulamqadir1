@@ -18,18 +18,24 @@ export function LoginForm() {
     setError("");
 
     const form = new FormData(event.currentTarget);
-    const result = await signIn("credentials", {
-      email: String(form.get("email")),
-      password: String(form.get("password")),
-      redirect: false,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email: String(form.get("email")),
+        password: String(form.get("password")),
+        redirect: false,
+      });
 
-    if (result?.error) {
-      setError("Invalid email or password.");
-    } else {
-      router.push("/admin");
+      if (!result?.ok || result.error) {
+        setError("Invalid email or password.");
+      } else {
+        router.push("/admin");
+        router.refresh();
+      }
+    } catch {
+      setError("Unable to sign in right now. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

@@ -22,9 +22,16 @@ export const authOptions: NextAuthOptions = {
       const email = credentials?.email?.trim().toLowerCase();
       const password = credentials?.password;
       if (!email || !password) return null;
-      const profile = await collection<Profile>("profiles").then((items) => items.findOne({ email }));
-      if (!profile?.password_hash || profile.role !== "admin" || !(await bcrypt.compare(password, profile.password_hash))) return null;
-      return { id: profile.id, email: profile.email, role: profile.role };
+      try {
+        const profile = await collection<Profile>("profiles").then((items) => items.findOne({ email }));
+        if (!profile?.password_hash || profile.role !== "admin" || !(await bcrypt.compare(password, profile.password_hash))) return null;
+        return { id: profile.id, email: profile.email, role: profile.role };
+      } catch (error) {
+        console.error("Credentials authentication failed", {
+          message: error instanceof Error ? error.message : "unknown",
+        });
+        return null;
+      }
     },
   })],
   callbacks: {

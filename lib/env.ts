@@ -14,6 +14,17 @@ type SiteUrlEnvironment = {
   VERCEL_URL?: string;
 };
 
+type AuthSecretEnvironment = {
+  AUTH_SECRET?: string;
+  NEXTAUTH_SECRET?: string;
+  JWT_SECRET?: string;
+};
+
+type MongoEnvironment = {
+  MONGODB_URI?: string;
+  MONGO_URI?: string;
+};
+
 export const DEFAULT_SITE_URL = "https://mghulamqadir1.vercel.app";
 
 export function resolveSiteUrl(source: SiteUrlEnvironment): string {
@@ -23,6 +34,17 @@ export function resolveSiteUrl(source: SiteUrlEnvironment): string {
   const vercelHost = source.VERCEL_PROJECT_PRODUCTION_URL?.trim() || source.VERCEL_URL?.trim();
   if (!vercelHost) return DEFAULT_SITE_URL;
   return /^https?:\/\//i.test(vercelHost) ? vercelHost : `https://${vercelHost}`;
+}
+
+export function resolveAuthSecret(source: AuthSecretEnvironment): string | undefined {
+  return source.AUTH_SECRET?.trim()
+    || source.NEXTAUTH_SECRET?.trim()
+    || source.JWT_SECRET?.trim()
+    || undefined;
+}
+
+export function resolveMongoUri(source: MongoEnvironment): string | undefined {
+  return source.MONGODB_URI?.trim() || source.MONGO_URI?.trim() || undefined;
 }
 
 const envSchema = z.object({
@@ -47,6 +69,15 @@ const envSchema = z.object({
 
 const parsedEnv = envSchema.parse({
   ...process.env,
+  AUTH_SECRET: resolveAuthSecret({
+    AUTH_SECRET: process.env.AUTH_SECRET,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    JWT_SECRET: process.env.JWT_SECRET,
+  }),
+  MONGODB_URI: resolveMongoUri({
+    MONGODB_URI: process.env.MONGODB_URI,
+    MONGO_URI: process.env.MONGO_URI,
+  }),
   NEXT_PUBLIC_SITE_URL: resolveSiteUrl({
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
