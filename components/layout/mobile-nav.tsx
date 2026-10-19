@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ArrowRight, MessageSquare } from "lucide-react";
+import { Menu, X, ArrowRight, FileDown, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GitHubIcon, LinkedInIcon } from "@/components/ui/icons";
+import { BRAND_CONFIG } from "@/components/portfolio/brand-config";
 
 interface NavItem {
   label: string;
@@ -145,6 +146,18 @@ export function MobileNav() {
                 LinkedIn
               </a>
             </div>
+
+            <Button
+              variant="outline"
+              size="lg"
+              href={BRAND_CONFIG.resume.href}
+              external
+              className="w-full"
+              onClick={close}
+            >
+              <FileDown className="w-4 h-4 mr-2" aria-hidden="true" />
+              View Resume
+            </Button>
 
             <Button
               variant="primary"

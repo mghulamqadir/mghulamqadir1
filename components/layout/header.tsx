@@ -3,12 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, FileDown } from "lucide-react";
 import { MobileNav } from "./mobile-nav";
 import { Button } from "@/components/ui/button";
 import { GitHubIcon, LinkedInIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { BrandMark } from "@/components/brand/brand-mark";
+import { BRAND_CONFIG } from "@/components/portfolio/brand-config";
 
 const NAV_ITEMS = [
   { label: "About", href: "/about" },
@@ -94,6 +95,17 @@ export function Header() {
           </a>
 
           <div className="h-4 w-px bg-border mx-1" aria-hidden="true" />
+
+          <Button
+            variant="outline"
+            size="sm"
+            href={BRAND_CONFIG.resume.href}
+            external
+            className="text-xs font-semibold px-3 min-h-[38px]"
+          >
+            <FileDown className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>Resume</span>
+          </Button>
 
           <Button
             variant="primary"

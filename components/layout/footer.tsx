@@ -1,7 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import { Mail, ArrowUpRight } from "lucide-react";
+import { Mail, ArrowUpRight, FileDown } from "lucide-react";
 import { GitHubIcon, LinkedInIcon } from "@/components/ui/icons";
+import { BRAND_CONFIG } from "@/components/portfolio/brand-config";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -51,6 +52,15 @@ export function Footer() {
               <Mail className="w-4 h-4" aria-hidden="true" />
               <span>Email</span>
             </Link>
+            <a
+              href={BRAND_CONFIG.resume.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-text-muted hover:text-text transition-colors min-h-[44px] py-2"
+            >
+              <FileDown className="w-4 h-4" aria-hidden="true" />
+              <span>Resume PDF</span>
+            </a>
           </div>
         </div>
 

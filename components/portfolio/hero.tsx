@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { ArrowRight, MessageSquare } from "lucide-react";
+import { ArrowRight, FileDown, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { BRAND_CONFIG } from "./brand-config";
@@ -51,6 +51,16 @@ export function Hero() {
               </Button>
               <Button
                 variant="secondary"
+                size="lg"
+                href={BRAND_CONFIG.resume.href}
+                external
+                className="w-full sm:w-auto min-h-[48px] px-6 text-sm font-medium"
+              >
+                <FileDown className="w-4 h-4 mr-2 text-text-muted" aria-hidden="true" />
+                <span>View resume</span>
+              </Button>
+              <Button
+                variant="ghost"
                 size="lg"
                 href="/contact"
                 className="w-full sm:w-auto min-h-[48px] px-6 text-sm font-medium"

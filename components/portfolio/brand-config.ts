@@ -18,6 +18,10 @@ export const BRAND_CONFIG = {
     height: 1024,
     alt: "Portrait of Ghulam Qadir with a moonlit mountain temple scene blended into his silhouette",
   },
+  resume: {
+    href: "/resume/ghulam-qadir-resume.pdf",
+    filename: "Ghulam-Qadir-Resume.pdf",
+  },
   bioSentence:
     "I engineer reliable backend systems, intelligent AI/RAG pipelines, and high-performance SaaS applications designed for production resilience.",
 };
