@@ -2,15 +2,17 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { MongoClient } from "mongodb";
 import { randomUUID } from "crypto";
+import { mongoScriptEnv, requireEnv } from "./env-contract.mjs";
 
-const { MONGO_URI, MONGODB_DB_NAME = "portfolio", BOOTSTRAP_ADMIN_EMAIL, BOOTSTRAP_ADMIN_PASSWORD } = process.env;
-if (!MONGO_URI || !BOOTSTRAP_ADMIN_EMAIL || !BOOTSTRAP_ADMIN_PASSWORD) throw new Error("MONGO_URI, BOOTSTRAP_ADMIN_EMAIL, and BOOTSTRAP_ADMIN_PASSWORD are required.");
+const { uri, dbName } = mongoScriptEnv();
+const BOOTSTRAP_ADMIN_EMAIL = requireEnv("BOOTSTRAP_ADMIN_EMAIL");
+const BOOTSTRAP_ADMIN_PASSWORD = requireEnv("BOOTSTRAP_ADMIN_PASSWORD");
 if (BOOTSTRAP_ADMIN_PASSWORD.length < 12) throw new Error("BOOTSTRAP_ADMIN_PASSWORD must be at least 12 characters.");
 
-const client = new MongoClient(MONGO_URI);
+const client = new MongoClient(uri);
 await client.connect();
 try {
-  const profiles = client.db(MONGODB_DB_NAME).collection("profiles");
+  const profiles = client.db(dbName).collection("profiles");
   const email = BOOTSTRAP_ADMIN_EMAIL.trim().toLowerCase();
   const now = new Date().toISOString();
   const existing = await profiles.findOne({ email });

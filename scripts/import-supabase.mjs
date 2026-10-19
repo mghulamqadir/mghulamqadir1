@@ -1,11 +1,13 @@
 import "dotenv/config";
 import { MongoClient } from "mongodb";
+import { mongoScriptEnv, requireEnv } from "./env-contract.mjs";
 
-const { MONGO_URI, MONGODB_DB_NAME = "portfolio", SUPABASE_IMPORT_URL, SUPABASE_IMPORT_SERVICE_ROLE_KEY } = process.env;
-if (!MONGO_URI || !SUPABASE_IMPORT_URL || !SUPABASE_IMPORT_SERVICE_ROLE_KEY) throw new Error("MONGO_URI, SUPABASE_IMPORT_URL, and SUPABASE_IMPORT_SERVICE_ROLE_KEY are required.");
+const { uri, dbName } = mongoScriptEnv();
+const SUPABASE_IMPORT_URL = requireEnv("SUPABASE_IMPORT_URL");
+const SUPABASE_IMPORT_SERVICE_ROLE_KEY = requireEnv("SUPABASE_IMPORT_SERVICE_ROLE_KEY");
 
 const collections = ["profiles", "projects", "technologies", "project_technologies", "project_images", "testimonials", "experiences", "experience_highlights", "skills", "education", "certifications", "social_links", "contact_submissions", "site_settings", "audit_logs"];
-const client = new MongoClient(MONGO_URI);
+const client = new MongoClient(uri);
 
 async function sourceRows(name) {
   const rows = [];
@@ -20,12 +22,15 @@ async function sourceRows(name) {
 
 await client.connect();
 try {
-  const target = client.db(MONGODB_DB_NAME);
+  const target = client.db(dbName);
   for (const name of collections) {
     const rows = await sourceRows(name);
     const operations = rows.map((row) => {
       const filter = name === "site_settings" ? { key: row.key } : { id: row.id };
-      return { replaceOne: { filter, replacement: row, upsert: true } };
+      const replacement = name === "audit_logs" && typeof row.created_at === "string"
+        ? { ...row, created_at: new Date(row.created_at) }
+        : row;
+      return { replaceOne: { filter, replacement, upsert: true } };
     });
     if (operations.length) await target.collection(name).bulkWrite(operations, { ordered: false });
     const count = await target.collection(name).countDocuments();

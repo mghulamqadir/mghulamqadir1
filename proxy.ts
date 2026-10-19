@@ -1,6 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse, type NextRequest, type NextFetchEvent } from "next/server";
 import { trackRequest } from "@/lib/logging/request-tracker";
+import { env } from "@/lib/env";
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const pathname = request.nextUrl.pathname;
@@ -18,19 +19,15 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
   // 2. Authentication and authorization check for admin routes
   const requiresAuth =
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/api/admin/") ||
     pathname === "/login";
 
   if (requiresAuth) {
     const token = await getToken({
       req: request,
-      secret: process.env.AUTH_SECRET ?? process.env.JWT_SECRET,
+      secret: env.AUTH_SECRET,
     });
     const isAdmin = token?.role === "admin";
 
-    if (pathname.startsWith("/api/admin/") && !isAdmin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
     if (pathname.startsWith("/admin") && !isAdmin) {
       return NextResponse.redirect(new URL("/login", request.url));
     }

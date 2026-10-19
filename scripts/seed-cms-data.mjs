@@ -1,13 +1,8 @@
 import "dotenv/config";
 import { MongoClient } from "mongodb";
+import { mongoScriptEnv } from "./env-contract.mjs";
 
-const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
-const dbName = process.env.MONGODB_DB_NAME || "portfolio";
-
-if (!uri) {
-  console.error("Error: MONGO_URI or MONGODB_URI is required.");
-  process.exit(1);
-}
+const { uri, dbName } = mongoScriptEnv();
 
 const client = new MongoClient(uri);
 

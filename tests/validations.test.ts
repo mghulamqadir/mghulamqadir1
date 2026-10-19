@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { contactSchema, projectSchema } from "@/lib/validations";
+import { contactSchema, projectPatchSchema, projectSchema } from "@/lib/validations";
 import { deleteRequestLogsSchema } from "@/lib/schema";
+import { contentPatchSchemas } from "@/lib/content/content-config";
 
 describe("validation", () => {
   it("accepts a valid contact message", () => { expect(contactSchema.safeParse({ name: "Ada Lovelace", email: "ada@example.com", subject: "Hello", message: "This is a valid message." }).success).toBe(true); });
   it("rejects a honeypot submission", () => { expect(contactSchema.safeParse({ name: "Ada", email: "ada@example.com", subject: "Hello", message: "This is long enough.", website: "bot" }).success).toBe(false); });
   it("requires a URL-safe project slug", () => { expect(projectSchema.safeParse({ title: "Test", slug: "not valid", short_description: "A valid description", company: "", role: "", category: "AI", status: "draft", featured: false }).success).toBe(false); });
+  it("does not inject defaults into project patches", () => { expect(projectPatchSchema.parse({ title: "Updated title" })).toEqual({ title: "Updated title" }); });
+  it("does not inject sort order into content patches", () => { expect(contentPatchSchemas.testimonials.parse({ name: "Updated name" })).toEqual({ name: "Updated name" }); });
   it("validates deleteRequestLogsSchema correctly", () => {
     expect(deleteRequestLogsSchema.safeParse({}).success).toBe(false);
     expect(deleteRequestLogsSchema.safeParse({ ids: [] }).success).toBe(false);

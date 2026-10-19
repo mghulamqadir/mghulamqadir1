@@ -5,6 +5,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { ContactForm } from "@/components/portfolio/contact-form";
 import { GitHubIcon, LinkedInIcon } from "@/components/ui/icons";
 import type { Metadata } from "next";
+import { env } from "@/lib/env";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -33,7 +34,7 @@ export default function ContactPage() {
             {/* Direct Contact Cards */}
             <div className="space-y-4 w-full pt-4 border-t border-border">
               <a
-                href="mailto:mohammadghulam.qadir@gmail.com"
+                href={`mailto:${env.CONTACT_TO_EMAIL}`}
                 className="flex items-center gap-3.5 p-4 rounded-xl border border-border bg-surface hover:border-border-strong hover:bg-surface-2 transition-all group"
               >
                 <div className="w-10 h-10 rounded-lg bg-surface-2 border border-border flex items-center justify-center text-accent group-hover:scale-105 transition-transform">
@@ -42,7 +43,7 @@ export default function ContactPage() {
                 <div className="flex flex-col">
                   <span className="text-xs font-mono text-text-faint uppercase">Direct Email</span>
                   <span className="text-sm font-semibold text-text group-hover:text-accent transition-colors">
-                    mohammadghulam.qadir@gmail.com
+                    {env.CONTACT_TO_EMAIL}
                   </span>
                 </div>
               </a>

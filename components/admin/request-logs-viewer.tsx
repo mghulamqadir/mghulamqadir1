@@ -410,9 +410,9 @@ export function RequestLogsViewer({
           <p className="font-mono text-xs uppercase tracking-wider text-[#6c9cff]">
             Monitoring &amp; Telemetry
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-white">Visitor &amp; Request Logs</h1>
+          <h1 className="mt-2 text-3xl font-bold text-white">Visitor Page Views</h1>
           <p className="mt-1 text-sm text-[#8590A2]">
-            Real-time IP tracking, visitor session journeys, and inbound request history.
+            First-party page-view tracking and visitor navigation journeys.
           </p>
         </div>
 
@@ -794,6 +794,7 @@ export function RequestLogsViewer({
                         <span className="text-[#71717a] uppercase font-semibold tracking-wider flex items-center gap-1.5">
                           <Clock className="h-3.5 w-3.5 text-[#6c9cff]" />
                           Visited Paths Timeline ({group.visits.length} records)
+                          {group.visits_truncated ? " — latest 100" : ""}
                         </span>
                         <span className="text-[#52525b]">Order: Chronological (Newest First)</span>
                       </div>

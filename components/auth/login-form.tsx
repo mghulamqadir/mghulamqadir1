@@ -82,7 +82,7 @@ export function LoginForm() {
         disabled={loading}
         className="w-full min-h-[48px] text-sm font-semibold"
       >
-        <span>{loading ? "Signing in…" : "Sign in to CMS"}</span>
+        <span>{loading ? "Signing in…" : "Sign in"}</span>
       </Button>
     </form>
   );

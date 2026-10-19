@@ -1,16 +1,17 @@
-import { NextResponse } from "next/server";
-import { buildContactEmail } from "@/lib/email/contact-message";
+import { after, NextResponse } from "next/server";
+import { deliverContactMessage } from "@/lib/email/deliver-contact-message";
 import { env } from "@/lib/env";
-import { insertMessage, updateMessage } from "@/lib/repositories";
+import { insertMessage } from "@/lib/repositories";
 import { isRateLimited } from "@/lib/rate-limit";
 import { contactSchema } from "@/lib/validations";
+import { getClientIpFromHeaders } from "@/lib/logging/request-tracker";
 
 const RATE_LIMIT_MS = 30_000;
 
 export async function POST(request: Request) {
   const contentLength = Number(request.headers.get("content-length") ?? 0);
   if (contentLength > 16_000) return NextResponse.json({ error: "Request is too large." }, { status: 413 });
-  const ip = request.headers.get("cf-connecting-ip") ?? request.headers.get("x-real-ip") ?? "unknown";
+  const ip = getClientIpFromHeaders(request.headers);
   if (isRateLimited(ip, RATE_LIMIT_MS)) return NextResponse.json({ error: "Please wait before sending another message." }, { status: 429 });
   const rawBody = await request.json().catch(() => null);
   if (!rawBody || typeof rawBody !== "object") {
@@ -27,16 +28,9 @@ export async function POST(request: Request) {
   }
   let id: string;
   try { id = await insertMessage({ name: parsed.data.name, email: parsed.data.email, subject: parsed.data.subject, message: parsed.data.message }); } catch (error) { console.error("Contact submission persistence failed", { message: error instanceof Error ? error.message : "unknown" }); return NextResponse.json({ error: "Unable to save your message right now." }, { status: 503 }); }
-  if (!env.BREVO_API_KEY || !env.BREVO_SENDER_EMAIL) return NextResponse.json({ ok: true, id, delivery: "pending" }, { status: 202 });
-  const template = buildContactEmail({ ...parsed.data, receivedAt: new Date().toISOString() });
-  try {
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", { method: "POST", headers: { accept: "application/json", "api-key": env.BREVO_API_KEY, "content-type": "application/json" }, body: JSON.stringify({ sender: { email: env.BREVO_SENDER_EMAIL, name: env.BREVO_SENDER_NAME }, to: [{ email: env.CONTACT_TO_EMAIL }], replyTo: { email: parsed.data.email, name: parsed.data.name }, subject: `Portfolio Contact — ${parsed.data.subject}`, ...template }) });
-    const result = await response.json().catch(() => null) as { messageId?: string } | null;
-    if (!response.ok) { await updateMessage(id, { email_status: "failed" }); return NextResponse.json({ ok: true, id, delivery: "failed" }, { status: 202 }); }
-    await updateMessage(id, { email_status: "sent", brevo_message_id: result?.messageId ?? null });
-    return NextResponse.json({ ok: true, id });
-  } catch {
-    await updateMessage(id, { email_status: "failed" });
-    return NextResponse.json({ ok: true, id, delivery: "failed" }, { status: 202 });
+  if (env.BREVO_API_KEY && env.BREVO_SENDER_EMAIL) {
+    const message = { name: parsed.data.name, email: parsed.data.email, subject: parsed.data.subject, message: parsed.data.message };
+    after(() => deliverContactMessage(id, message));
   }
+  return NextResponse.json({ ok: true, id, delivery: "pending" }, { status: 202 });
 }

@@ -1,13 +1,14 @@
 import "dotenv/config";
 import { MongoClient } from "mongodb";
+import { integerEnv, mongoScriptEnv } from "./env-contract.mjs";
 
-const { MONGO_URI, MONGODB_DB_NAME = "portfolio" } = process.env;
-if (!MONGO_URI) throw new Error("MONGO_URI is required.");
-const client = new MongoClient(MONGO_URI);
+const { uri, dbName } = mongoScriptEnv();
+const retentionDays = integerEnv("REQUEST_LOG_RETENTION_DAYS", 90, 1, 3650);
+const client = new MongoClient(uri);
 await client.connect();
 
 try {
-  const db = client.db(MONGODB_DB_NAME);
+  const db = client.db(dbName);
 
   const indexDefinitions = [
     { coll: "profiles", spec: { email: 1 }, options: { unique: true, sparse: true } },
@@ -29,9 +30,10 @@ try {
     { coll: "audit_logs", spec: { user_id: 1 } },
     { coll: "audit_logs", spec: { entity: 1, entity_id: 1, created_at: -1 } },
     { coll: "request_logs", spec: { created_at: -1 } },
-    { coll: "request_logs", spec: { ip: 1 } },
-    { coll: "request_logs", spec: { path: 1 } },
-    { coll: "request_logs", spec: { created_at: 1 }, options: { expireAfterSeconds: 60 * 60 * 24 * 90 } },
+    { coll: "request_logs", spec: { ip: 1, created_at: -1 } },
+    { coll: "request_logs", spec: { path: 1, created_at: -1 } },
+    { coll: "request_logs", spec: { id: 1 }, options: { unique: true } },
+    { coll: "request_logs", spec: { created_at: 1 }, options: { expireAfterSeconds: 60 * 60 * 24 * retentionDays } },
     { coll: "site_settings", spec: { key: 1 }, options: { unique: true } },
   ];
 
@@ -40,6 +42,15 @@ try {
       await db.collection(coll).createIndex(spec, options || {});
       console.log(`✓ Index created on ${coll}:`, JSON.stringify(spec));
     } catch (err) {
+      if (options?.expireAfterSeconds !== undefined) {
+        const indexes = await db.collection(coll).indexes();
+        const existing = indexes.find((index) => JSON.stringify(index.key) === JSON.stringify(spec));
+        if (existing) {
+          await db.command({ collMod: coll, index: { name: existing.name, expireAfterSeconds: options.expireAfterSeconds } });
+          console.log(`✓ TTL updated on ${coll}:`, JSON.stringify(spec));
+          continue;
+        }
+      }
       console.warn(`! Skipped index on ${coll} (${JSON.stringify(spec)}):`, err instanceof Error ? err.message : String(err));
     }
   }

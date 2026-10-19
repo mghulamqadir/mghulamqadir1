@@ -53,4 +53,5 @@ export interface IpGroupedLog {
   region?: string | null;
   user_agent?: string | null;
   visits: PathVisit[];
+  visits_truncated: boolean;
 }

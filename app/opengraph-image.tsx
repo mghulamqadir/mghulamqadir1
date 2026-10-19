@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { env } from "@/lib/env";
 
 export const runtime = "nodejs";
 export const alt = "Ghulam Qadir — Backend-Focused Full Stack Engineer";
@@ -188,7 +189,7 @@ export default async function OGImage() {
               fontFamily: "monospace",
             }}
           >
-            mghulamqadir1.vercel.app
+            {new URL(env.NEXT_PUBLIC_SITE_URL).host}
           </div>
         </div>
       </div>

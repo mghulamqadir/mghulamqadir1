@@ -4,12 +4,13 @@ import {
   getClientIp,
   cleanIp,
   isPrefetchRequest,
+  isPageViewRequest,
   shouldIgnoreRequest,
 } from "@/lib/logging/request-tracker";
 
 function createMockRequest(url: string, headers: Record<string, string> = {}): NextRequest {
   const req = new NextRequest(new URL(url, "https://portfolio.local"), {
-    headers: new Headers(headers),
+    headers: new Headers({ accept: "text/html,application/xhtml+xml", ...headers }),
   });
   return req;
 }
@@ -142,9 +143,20 @@ describe("request-tracker: shouldIgnoreRequest", () => {
     expect(shouldIgnoreRequest(req2, ip)).toBe(true);
   });
 
-  it("tracks public API endpoints", () => {
+  it("ignores public API endpoints", () => {
     const req = createMockRequest("https://portfolio.local/api/contact", {});
-    expect(shouldIgnoreRequest(req, "10.0.0.5")).toBe(false);
+    expect(shouldIgnoreRequest(req, "10.0.0.5")).toBe(true);
+  });
+
+  it("ignores React Server Component navigations", () => {
+    const req = createMockRequest("https://portfolio.local/projects", { rsc: "1" });
+    expect(isPageViewRequest(req)).toBe(false);
+    expect(shouldIgnoreRequest(req, "10.0.0.6")).toBe(true);
+  });
+
+  it("ignores non-document JSON requests", () => {
+    const req = createMockRequest("https://portfolio.local/projects", { accept: "application/json" });
+    expect(isPageViewRequest(req)).toBe(false);
   });
 
   it("ignores all admin CMS and admin API routes", () => {

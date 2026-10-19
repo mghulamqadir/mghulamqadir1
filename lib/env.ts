@@ -1,58 +1,46 @@
 import { z } from "@/lib/schema";
 
-const defaultSiteUrl = "https://mghulamqadir1.vercel.app";
+export function parseDurationSeconds(value: string): number {
+  const match = value.trim().match(/^(\d+)([smhd])$/i);
+  if (!match) throw new Error("JWT_EXPIRES_IN must use a duration such as 30m, 8h, or 7d.");
+  const amount = Number(match[1]);
+  const multiplier = { s: 1, m: 60, h: 3_600, d: 86_400 }[match[2].toLowerCase() as "s" | "m" | "h" | "d"];
+  return amount * multiplier;
+}
 
 const envSchema = z.object({
-  NEXT_PUBLIC_SITE_URL: z.string().optional(),
+  NEXT_PUBLIC_SITE_URL: z.url(),
   MONGODB_URI: z.string().min(1).optional(),
-  MONGO_URI: z.string().min(1).optional(),
   MONGODB_DB_NAME: z.string().min(1).default("portfolio"),
+  MONGODB_MAX_POOL_SIZE: z.coerce.number().int().min(1).max(50).default(10),
+  MONGODB_WAIT_QUEUE_TIMEOUT_MS: z.coerce.number().int().min(500).max(30_000).default(5_000),
+  MONGODB_SOCKET_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(60_000).default(10_000),
+  MONGODB_SERVER_SELECTION_TIMEOUT_MS: z.coerce.number().int().min(500).max(30_000).default(5_000),
+  REQUEST_LOG_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(90),
   AUTH_SECRET: z.string().trim().min(32).optional(),
-  NEXTAUTH_SECRET: z.string().trim().min(32).optional(),
-  JWT_SECRET: z.string().trim().min(32).optional(),
+  JWT_EXPIRES_IN: z.string().trim().regex(/^\d+[smhd]$/i).default("8h").transform(parseDurationSeconds),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   BREVO_API_KEY: z.string().optional(),
   BREVO_SENDER_EMAIL: z.email().optional(),
-  BREVO_SENDER_NAME: z.string().default("Ghulam Qadir Portfolio"),
-  CONTACT_TO_EMAIL: z.email().default("mohammadghulam.qadir@gmail.com"),
-  SENDER_EMAIL: z.email().optional(),
-  SENDER_NAME: z.string().optional(),
-}).transform(raw => {
-  // Normalize site URL
-  let siteUrl = (raw.NEXT_PUBLIC_SITE_URL || "").trim();
-  if (!siteUrl) {
-    siteUrl = defaultSiteUrl;
-  } else if (!siteUrl.startsWith("http://") && !siteUrl.startsWith("https://")) {
-    siteUrl = `https://${siteUrl}`;
-  }
-
-  const resolvedSecret = raw.AUTH_SECRET || raw.NEXTAUTH_SECRET || raw.JWT_SECRET;
-
-  return {
-    ...raw,
-    NEXT_PUBLIC_SITE_URL: siteUrl,
-    AUTH_SECRET: resolvedSecret,
-    MONGODB_URI: raw.MONGODB_URI ?? raw.MONGO_URI,
-    BREVO_SENDER_EMAIL: raw.BREVO_SENDER_EMAIL ?? raw.SENDER_EMAIL,
-    BREVO_SENDER_NAME: raw.SENDER_NAME ?? raw.BREVO_SENDER_NAME,
+  BREVO_SENDER_NAME: z.string().trim().min(1).optional(),
+  CONTACT_TO_EMAIL: z.email().optional(),
+}).superRefine((raw, context) => {
+  const requireGroup = (names: Array<keyof typeof raw>, enabled: boolean) => {
+    if (!enabled) return;
+    for (const name of names) if (!raw[name]) context.addIssue({ code: "custom", path: [name], message: `${name} is required when this integration is configured.` });
   };
+  requireGroup(["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"], Boolean(raw.CLOUDINARY_CLOUD_NAME || raw.CLOUDINARY_API_KEY || raw.CLOUDINARY_API_SECRET));
+  requireGroup(["BREVO_API_KEY", "BREVO_SENDER_EMAIL", "BREVO_SENDER_NAME", "CONTACT_TO_EMAIL"], Boolean(raw.BREVO_API_KEY || raw.BREVO_SENDER_EMAIL || raw.BREVO_SENDER_NAME || raw.CONTACT_TO_EMAIL));
 });
 
 const parsedEnv = envSchema.parse(process.env);
-export const env = { 
-  ...parsedEnv, 
-  NEXT_PUBLIC_SITE_URL: parsedEnv.NEXT_PUBLIC_SITE_URL as string,
-  AUTH_SECRET: parsedEnv.AUTH_SECRET,
-  MONGODB_URI: parsedEnv.MONGODB_URI ?? parsedEnv.MONGO_URI, 
-  BREVO_SENDER_EMAIL: parsedEnv.BREVO_SENDER_EMAIL ?? parsedEnv.SENDER_EMAIL, 
-  BREVO_SENDER_NAME: parsedEnv.SENDER_NAME ?? parsedEnv.BREVO_SENDER_NAME 
-};
+export const env = parsedEnv;
 
 /** Call only in an authentication runtime path, never from public static rendering. */
 export function requireAuthSecret(): string {
-  if (!env.AUTH_SECRET) throw new Error("AUTH_SECRET (or NEXTAUTH_SECRET/JWT_SECRET) must be set to at least 32 characters.");
+  if (!env.AUTH_SECRET) throw new Error("AUTH_SECRET must be set to at least 32 characters.");
   return env.AUTH_SECRET;
 }
 

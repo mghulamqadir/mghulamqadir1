@@ -7,7 +7,7 @@ A production-oriented portfolio and private content-management system for **Ghul
 - Next.js 16 App Router, React 19, TypeScript, Tailwind CSS
 - MongoDB Atlas, Auth.js JWT sessions, and server-enforced admin authorization
 - Cloudinary for media assets
-- Resend for transactional contact email
+- Brevo for transactional contact email
 - Zod for server-side validation
 
 ## Local development
@@ -46,9 +46,10 @@ Route Handlers validate input and authorize the caller; repositories own databas
 Create a MongoDB Atlas database and add its connection string as `MONGODB_URI`. Generate an `AUTH_SECRET` (at least 32 random characters) and set the bootstrap owner credentials in server-only environment variables.
 
 1. Run `npm run db:indexes`.
-2. Run `npm run db:bootstrap-admin` to create the CMS owner account.
-3. For a one-time Supabase cutover only, set `SUPABASE_IMPORT_URL` and `SUPABASE_IMPORT_SERVICE_ROLE_KEY`, then run `npm run db:import-supabase`.
-4. Confirm each reported source/target count, sign in with the newly created owner account, then remove the temporary import variables.
+2. For an existing installation, run `npm run db:migrate-log-dates` once to convert legacy log timestamps and enforce retention.
+3. Run `npm run db:bootstrap-admin` to create the CMS owner account.
+4. For a one-time Supabase cutover only, set `SUPABASE_IMPORT_URL` and `SUPABASE_IMPORT_SERVICE_ROLE_KEY`, then run `npm run db:import-supabase`.
+5. Confirm each reported source/target count, sign in with the newly created owner account, then remove the temporary import variables.
 
 The importer is idempotent: it preserves source UUIDs and can be rerun safely. Supabase user passwords are not imported; use the bootstrap account instead.
 
@@ -57,19 +58,24 @@ The importer is idempotent: it preserves source UUIDs and can be rerun safely. S
 Use [`.env.example`](.env.example) as the canonical variable-name reference. Secret values must remain server-only and must never use the `NEXT_PUBLIC_` prefix:
 
 - `MONGODB_URI`
+- `MONGODB_MAX_POOL_SIZE` and MongoDB timeout overrides (optional)
+- `REQUEST_LOG_RETENTION_DAYS` (defaults to 90)
 - `AUTH_SECRET`
 - `CLOUDINARY_API_SECRET`
 - `BREVO_API_KEY`
+
+Run `npm run env:check` before builds and deployments. It validates canonical names without printing values. If upgrading from legacy names, run `npm run env:normalize` once.
 
 ## Content and media responsibilities
 
 - **MongoDB Atlas:** structured portfolio and CMS data.
 - **Cloudinary:** project images, gallery media, profile image, certifications, and resume files.
-- **Resend:** server-side contact email delivery; visitor email is used only as `Reply-To`.
+- **Brevo:** background contact-email delivery after the submission is stored; visitor email is used only as `Reply-To`.
 
 ## Quality and security
 
 - Public content is read only by server-side MongoDB repositories.
 - CMS access requires Auth.js authentication and explicit admin authorization.
 - Contact submissions are validated server-side and stored before email delivery.
+- Public analytics records real HTML page views rather than API, asset, prefetch, or React Server Component requests.
 - Do not expose service-role, Cloudinary, or email API credentials to the browser.

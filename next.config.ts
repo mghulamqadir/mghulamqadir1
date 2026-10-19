@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: { remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }] },
   poweredByHeader: false,
+  experimental: {
+    staticGenerationRetryCount: 2,
+    staticGenerationMaxConcurrency: 2,
+    staticGenerationMinPagesPerWorker: 100,
+  },
   async headers() {
     return [{ source: "/:path*", headers: [
       { key: "X-Content-Type-Options", value: "nosniff" },

@@ -3,6 +3,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { env } from "@/lib/env";
 import { collection } from "@/lib/database/mongodb";
 
@@ -12,7 +13,7 @@ export const authOptions: NextAuthOptions = {
   // Deliberately optional at module evaluation time so public static routes can build
   // without auth credentials. NextAuth rejects missing secrets when auth is invoked in production.
   secret: env.AUTH_SECRET,
-  session: { strategy: "jwt", maxAge: 60 * 60 * 8 },
+  session: { strategy: "jwt", maxAge: env.JWT_EXPIRES_IN },
   pages: { signIn: "/login" },
   providers: [CredentialsProvider({
     name: "Portfolio owner",
@@ -38,11 +39,11 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-export async function getAdminSession() {
+export const getAdminSession = cache(async () => {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || session.user.role !== "admin") return null;
   return { user: { id: session.user.id, email: session.user.email ?? "", role: "admin" as const } };
-}
+});
 
 export async function requireAdmin() {
   const session = await getAdminSession();

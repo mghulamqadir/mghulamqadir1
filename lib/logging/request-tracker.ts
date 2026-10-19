@@ -24,31 +24,29 @@ const DEDUPE_WINDOW_MS = 1500; // 1.5 seconds
  * CDNs (Vercel, Cloudflare), and local environments.
  */
 export function getClientIp(request: NextRequest): string {
-  // 1. Check x-forwarded-for header (left-most IP is the original client)
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    const firstIp = forwardedFor.split(",")[0]?.trim();
-    if (firstIp) return cleanIp(firstIp);
-  }
+  return getClientIpFromHeaders(request.headers, (request as unknown as { ip?: string }).ip);
+}
 
-  // 2. Check direct provider headers
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp) return cleanIp(realIp.trim());
-
-  const cfConnectingIp = request.headers.get("cf-connecting-ip");
+export function getClientIpFromHeaders(headers: Headers, directIp?: string): string {
+  const cfConnectingIp = headers.get("cf-connecting-ip");
   if (cfConnectingIp) return cleanIp(cfConnectingIp.trim());
 
-  const vercelForwardedFor = request.headers.get("x-vercel-forwarded-for");
+  const realIp = headers.get("x-real-ip");
+  if (realIp) return cleanIp(realIp.trim());
+
+  const vercelForwardedFor = headers.get("x-vercel-forwarded-for");
   if (vercelForwardedFor) {
     const firstIp = vercelForwardedFor.split(",")[0]?.trim();
     if (firstIp) return cleanIp(firstIp);
   }
 
-  // 3. Fallback to runtime ip property if present
-  const directIp = (request as unknown as { ip?: string }).ip;
-  if (directIp) return cleanIp(directIp);
+  const forwardedFor = headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const firstIp = forwardedFor.split(",")[0]?.trim();
+    if (firstIp) return cleanIp(firstIp);
+  }
 
-  // 4. Default fallback for local development
+  if (directIp) return cleanIp(directIp);
   return "127.0.0.1";
 }
 
@@ -85,6 +83,16 @@ export function isPrefetchRequest(request: NextRequest): boolean {
   return false;
 }
 
+/** True only for a user-visible HTML document navigation. */
+export function isPageViewRequest(request: NextRequest): boolean {
+  if (request.method !== "GET") return false;
+  if (request.nextUrl.pathname.startsWith("/api/")) return false;
+  if (request.headers.get("rsc") === "1" || request.headers.has("next-router-state-tree")) return false;
+  const destination = request.headers.get("sec-fetch-dest")?.toLowerCase();
+  const acceptsHtml = request.headers.get("accept")?.toLowerCase().includes("text/html") ?? false;
+  return destination === "document" || acceptsHtml;
+}
+
 /**
  * Filters out duplicate rapid GET requests from the exact same IP and path
  * within a short burst window (1.5s).
@@ -116,6 +124,8 @@ export function isDuplicateRapidRequest(ip: string, path: string): boolean {
  * or rapid burst duplicate that should not be logged.
  */
 export function shouldIgnoreRequest(request: NextRequest, ip: string): boolean {
+  if (!isPageViewRequest(request)) return true;
+
   // 1. Ignore automated Next.js Link prefetch requests
   if (isPrefetchRequest(request)) return true;
 

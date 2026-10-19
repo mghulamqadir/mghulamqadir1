@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowRight, Mail } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
+import { env } from "@/lib/env";
 
 export function CTASection() {
   return (
@@ -40,7 +41,7 @@ export function CTASection() {
             <Button
               variant="secondary"
               size="lg"
-              href="mailto:mohammadghulam.qadir@gmail.com"
+              href={`mailto:${env.CONTACT_TO_EMAIL}`}
               external
               className="w-full sm:w-auto min-h-[48px] px-6 text-sm font-medium"
             >
@@ -52,7 +53,7 @@ export function CTASection() {
           <div className="mt-8 flex items-center gap-3 text-xs font-mono text-text-faint">
             <span>Response within 24 hours</span>
             <span aria-hidden="true">•</span>
-            <span className="text-text-muted">mohammadghulam.qadir@gmail.com</span>
+            <span className="text-text-muted">{env.CONTACT_TO_EMAIL}</span>
           </div>
         </div>
       </Container>

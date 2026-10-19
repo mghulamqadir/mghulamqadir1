@@ -12,19 +12,19 @@ declare global {
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function connectWithRetry(): Promise<Mongoose> {
-  if (!hasMongo()) throw new Error("Missing MONGODB_URI (or MONGO_URI) environment variable.");
+  if (!hasMongo()) throw new Error("Missing MONGODB_URI environment variable.");
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
     try {
       const connection = await mongoose.connect(env.MONGODB_URI!, {
         dbName: env.MONGODB_DB_NAME,
-        maxPoolSize: 10,
+        maxPoolSize: env.MONGODB_MAX_POOL_SIZE,
         minPoolSize: 0,
         maxIdleTimeMS: 60_000,
-        waitQueueTimeoutMS: 5_000,
-        socketTimeoutMS: 10_000,
-        serverSelectionTimeoutMS: 5_000,
+        waitQueueTimeoutMS: env.MONGODB_WAIT_QUEUE_TIMEOUT_MS,
+        socketTimeoutMS: env.MONGODB_SOCKET_TIMEOUT_MS,
+        serverSelectionTimeoutMS: env.MONGODB_SERVER_SELECTION_TIMEOUT_MS,
       });
       console.info("MongoDB connected", { host: connection.connection.host, database: env.MONGODB_DB_NAME });
       return connection;

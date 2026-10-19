@@ -11,6 +11,16 @@ export const contentSchemas = {
   social_links: z.object({ platform: z.string().trim().min(2).max(80), url: httpUrlSchema, icon: optionalText(100), enabled: z.boolean(), ...common }),
 } as const;
 
+const patchSortOrder = z.coerce.number().int().min(0).max(10000).optional();
+export const contentPatchSchemas = {
+  testimonials: contentSchemas.testimonials.partial().extend({ sort_order: patchSortOrder }).strict(),
+  experiences: contentSchemas.experiences.partial().extend({ sort_order: patchSortOrder }).strict(),
+  skills: contentSchemas.skills.partial().extend({ sort_order: patchSortOrder }).strict(),
+  education: contentSchemas.education.partial().extend({ sort_order: patchSortOrder }).strict(),
+  certifications: contentSchemas.certifications.partial().extend({ sort_order: patchSortOrder }).strict(),
+  social_links: contentSchemas.social_links.partial().extend({ sort_order: patchSortOrder }).strict(),
+} as const;
+
 export type ContentResource = keyof typeof contentSchemas;
 export function isContentResource(value: string): value is ContentResource { return value in contentSchemas; }
 export const contentLabels: Record<ContentResource, string> = { testimonials: "Testimonials", experiences: "Experience", skills: "Skills", education: "Education", certifications: "Certifications", social_links: "Social links" };

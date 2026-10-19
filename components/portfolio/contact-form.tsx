@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Send, CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import { Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
 export function ContactForm() {
-  const [state, setState] = useState<"idle" | "sending" | "success" | "delayed" | "error">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [error, setError] = useState("");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -60,13 +60,8 @@ export function ContactForm() {
       });
 
       if (response.ok) {
-        const body = await response.json().catch(() => null);
         formElement.reset();
-        if (body?.delivery === "failed") {
-          setState("delayed");
-        } else {
-          setState("success");
-        }
+        setState("success");
       } else {
         const body = await response.json().catch(() => null);
         setError(body?.error ?? "Unable to send your message. Please try again or email directly.");
@@ -176,14 +171,7 @@ export function ContactForm() {
         {state === "success" && (
           <div className="flex items-center gap-2.5 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
             <CheckCircle2 className="w-5 h-5 shrink-0" aria-hidden="true" />
-            <span>Message received successfully. I will review and reply within 24 hours.</span>
-          </div>
-        )}
-
-        {state === "delayed" && (
-          <div className="flex items-center gap-2.5 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm">
-            <Clock className="w-5 h-5 shrink-0" aria-hidden="true" />
-            <span>Your message was securely saved. Email dispatch is queued and will arrive shortly.</span>
+            <span>Your message was securely received. I will review and reply within 24 hours.</span>
           </div>
         )}
 

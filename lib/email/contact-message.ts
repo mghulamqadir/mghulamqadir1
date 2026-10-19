@@ -1,3 +1,5 @@
+import { env } from "@/lib/env";
+
 export type ContactEmail = {
   name: string;
   email: string;
@@ -36,6 +38,8 @@ export function buildContactEmail(input: ContactEmail) {
   const safeMessage = escapeHtml(input.message);
   const formattedDate = formatTimestamp(input.receivedAt);
   const replyMailto = `mailto:${safeEmail}?subject=Re:%20${encodeURIComponent(input.subject)}`;
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+  const siteHost = new URL(siteUrl).host;
 
   const textContent =
     `New Portfolio Message\n` +
@@ -48,7 +52,7 @@ export function buildContactEmail(input: ContactEmail) {
     `${input.message}\n` +
     `---------------------\n\n` +
     `Reply directly to: ${input.email}\n` +
-    `CMS Messages Portal: https://mghulamqadir1.vercel.app/admin/messages\n`;
+    `CMS Messages Portal: ${siteUrl}/admin/messages\n`;
 
   const htmlContent = `<!DOCTYPE html>
 <html lang="en">
@@ -179,7 +183,7 @@ export function buildContactEmail(input: ContactEmail) {
                   </td>
                   <td align="right" style="vertical-align:middle;">
                     <!-- Secondary Link to CMS -->
-                    <a href="https://mghulamqadir1.vercel.app/admin/messages" style="color:#8590A2;font-size:13px;text-decoration:none;font-weight:500;">
+                    <a href="${siteUrl}/admin/messages" style="color:#8590A2;font-size:13px;text-decoration:none;font-weight:500;">
                       View in CMS &rarr;
                     </a>
                   </td>
@@ -192,7 +196,7 @@ export function buildContactEmail(input: ContactEmail) {
           <tr>
             <td style="padding:22px 32px;background-color:#0C0D13;border-top:1px solid #1A1D27;text-align:center;">
               <p style="margin:0 0 6px 0;font-size:12px;color:#636D7E;line-height:1.4;">
-                Inbound submission from <a href="https://mghulamqadir1.vercel.app" style="color:#8590A2;text-decoration:underline;">mghulamqadir1.vercel.app</a>.
+                Inbound submission from <a href="${siteUrl}" style="color:#8590A2;text-decoration:underline;">${siteHost}</a>.
               </p>
               <p style="margin:0;font-size:11px;color:#495160;font-family:monospace;">
                 Stored in MongoDB &bull; Routed via Brevo
@@ -209,3 +213,4 @@ export function buildContactEmail(input: ContactEmail) {
 
   return { textContent, htmlContent };
 }
+
